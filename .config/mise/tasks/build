@@ -5,3 +5,8 @@ set -e
 echo "Building morphir_models..."
 cd packages/morphir_models
 gleam build
+
+echo ""
+echo "Building morphir_cli..."
+cd ../morphir_cli
+gleam build --target javascript

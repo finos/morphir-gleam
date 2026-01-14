@@ -5,3 +5,8 @@ set -e
 echo "Checking morphir_models..."
 cd packages/morphir_models
 gleam check
+
+echo ""
+echo "Checking morphir_cli..."
+cd ../morphir_cli
+gleam check --target javascript
