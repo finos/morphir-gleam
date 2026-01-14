@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- None
+
+### Changed
+
+- None
+
+### Deprecated
+
+- None
+
+### Removed
+
+- None
+
+### Fixed
+
+- None
+
+### Security
+
+- None
+
+## [0.1.0] - 2026-01-14
+
+### Added
+
 - Initial Morphir IR type definitions in `morphir_models` package
   - Core types: `Name`, `Path`, `QName`, `FQName`
   - Type system: `Type`, `Specification`, `Definition`
@@ -63,9 +89,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - None
 
-## [0.1.0] - UNRELEASED
-
-Initial development release. See Unreleased section above for all changes.
+Initial release of morphir-gleam with core Morphir IR types, CLI tooling, and multi-platform executable support.
 
 [Unreleased]: https://github.com/finos/morphir-gleam/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/finos/morphir-gleam/releases/tag/v0.1.0
