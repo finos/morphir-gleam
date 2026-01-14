@@ -40,6 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - PowerShell install script for Windows (`install.ps1`)
   - Support for installing latest version or specific version
   - Automatic platform detection and PATH configuration
+- Repository governance
+  - CODEOWNERS file designating @finos/morphir-maintainers as code owners
 
 ### Changed
 
