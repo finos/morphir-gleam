@@ -1,0 +1,185 @@
+name: Release
+
+on:
+  # Allow manual trigger with version input
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v0.1.0)'
+        required: true
+        type: string
+  # Trigger on tag push
+  push:
+    tags:
+      - 'v*.*.*'
+  # Trigger on release creation
+  release:
+    types: [created]
+
+jobs:
+  # Run CI checks first
+  ci-checks:
+    name: CI Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+
+      - name: Format check
+        run: |
+          mise run format
+          if ! git diff --exit-code; then
+            echo "❌ Code is not formatted. Please run 'mise run format' locally."
+            exit 1
+          fi
+
+      - name: Type check
+        run: mise run check
+
+      - name: Run tests
+        run: mise run test
+
+      - name: Build packages
+        run: mise run build
+
+  # Build platform-specific binaries
+  build-binaries:
+    name: Build ${{ matrix.platform }}-${{ matrix.arch }}
+    needs: ci-checks
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          # Linux builds
+          - platform: linux
+            arch: x64
+            runner: ubuntu-latest
+            bun_target: bun-linux-x64
+            artifact_name: morphir-gleam-linux-x64
+          - platform: linux
+            arch: arm64
+            runner: ubuntu-latest
+            bun_target: bun-linux-arm64
+            artifact_name: morphir-gleam-linux-arm64
+
+          # macOS builds
+          - platform: macos
+            arch: x64
+            runner: macos-13
+            bun_target: bun-darwin-x64
+            artifact_name: morphir-gleam-macos-x64
+          - platform: macos
+            arch: arm64
+            runner: macos-14
+            bun_target: bun-darwin-arm64
+            artifact_name: morphir-gleam-macos-arm64
+
+          # Windows builds
+          - platform: windows
+            arch: x64
+            runner: windows-latest
+            bun_target: bun-windows-x64
+            artifact_name: morphir-gleam-windows-x64.exe
+          # Note: Windows ARM64 not yet supported by bun
+          # - platform: windows
+          #   arch: arm64
+          #   runner: windows-latest
+          #   bun_target: bun-windows-arm64
+          #   artifact_name: morphir-gleam-windows-arm64.exe
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+
+      - name: Build executable
+        run: mise run build-exe -- --target=${{ matrix.bun_target }}
+
+      - name: Rename binary
+        shell: bash
+        run: |
+          if [ "${{ matrix.platform }}" = "windows" ]; then
+            mv dist/morphir-gleam.exe dist/${{ matrix.artifact_name }}
+          else
+            mv dist/morphir-gleam dist/${{ matrix.artifact_name }}
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/${{ matrix.artifact_name }}
+          if-no-files-found: error
+
+  # Create or update release with binaries
+  create-release:
+    name: Create Release
+    needs: build-binaries
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "release" ]; then
+            echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create SHA256 checksums
+        run: |
+          cd artifacts
+          for dir in */; do
+            cd "$dir"
+            sha256sum * > ../checksums-${dir%/}.txt
+            cd ..
+          done
+          cat checksums-*.txt > SHA256SUMS.txt
+
+      - name: Create release
+        if: github.event_name != 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: Release ${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            artifacts/*/*
+            artifacts/SHA256SUMS.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to existing release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/*/*
+            artifacts/SHA256SUMS.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

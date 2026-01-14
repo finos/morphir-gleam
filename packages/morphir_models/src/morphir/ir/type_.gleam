@@ -65,7 +65,10 @@ pub type Specification(a) {
   OpaqueTypeSpecification(type_params: List(Name))
 
   /// A custom type specification (all constructors are visible)
-  CustomTypeSpecification(type_params: List(Name), constructors: Constructors(a))
+  CustomTypeSpecification(
+    type_params: List(Name),
+    constructors: Constructors(a),
+  )
 
   /// A derived type specification (a type derived from a base type)
   DerivedTypeSpecification(
@@ -108,7 +111,10 @@ pub fn map_attributes(tpe: Type(a), f: fn(a) -> b) -> Type(b) {
     Tuple(a, elems) ->
       Tuple(f(a), map_list(elems, fn(t) { map_attributes(t, f) }))
     Record(a, fields) ->
-      Record(f(a), map_list(fields, fn(field) { map_field_attributes(field, f) }))
+      Record(
+        f(a),
+        map_list(fields, fn(field) { map_field_attributes(field, f) }),
+      )
     ExtensibleRecord(a, var_name, fields) ->
       ExtensibleRecord(
         f(a),

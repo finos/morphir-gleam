@@ -1,0 +1,161 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  format:
+    name: Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+
+      - name: Format check
+        run: |
+          mise run format
+          if ! git diff --exit-code; then
+            echo "❌ Code is not formatted. Please run 'mise run format' locally."
+            exit 1
+          fi
+
+  check:
+    name: Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+
+      - name: Type check
+        run: mise run check
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+
+      - name: Run tests
+        run: mise run test
+
+  build:
+    name: Build Packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+
+      - name: Build packages
+        run: mise run build
+
+  # Pre-release validation for release branches
+  release-staging:
+    name: Release Staging - ${{ matrix.platform }}-${{ matrix.arch }}
+    # Only run on PRs targeting main from release branches
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'release/')
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - platform: linux
+            arch: x64
+            runner: ubuntu-latest
+            bun_target: bun-linux-x64
+          - platform: linux
+            arch: arm64
+            runner: ubuntu-latest
+            bun_target: bun-linux-arm64
+          - platform: macos
+            arch: x64
+            runner: macos-13
+            bun_target: bun-darwin-x64
+          - platform: macos
+            arch: arm64
+            runner: macos-14
+            bun_target: bun-darwin-arm64
+          - platform: windows
+            arch: x64
+            runner: windows-latest
+            bun_target: bun-windows-x64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for changelog validation
+
+      - name: Install mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+
+      - name: Validate CHANGELOG
+        if: matrix.platform == 'linux' && matrix.arch == 'x64'
+        run: |
+          echo "📋 Checking CHANGELOG.md for unreleased changes..."
+
+          if ! grep -q "## \[Unreleased\]" CHANGELOG.md; then
+            echo "❌ CHANGELOG.md must have an [Unreleased] section"
+            exit 1
+          fi
+
+          # Check if there are any changes in the Unreleased section
+          if grep -A 20 "## \[Unreleased\]" CHANGELOG.md | grep -q "### Added\|### Changed\|### Fixed\|### Removed"; then
+            echo "✅ CHANGELOG.md has been updated with changes"
+          else
+            echo "❌ CHANGELOG.md [Unreleased] section appears empty"
+            echo "Please document your changes following Keep a Changelog format"
+            exit 1
+          fi
+
+      - name: Build executable
+        run: mise run build-exe -- --target=${{ matrix.bun_target }}
+
+      - name: Test executable
+        shell: bash
+        run: |
+          if [ "${{ matrix.platform }}" = "windows" ]; then
+            ./dist/morphir-gleam.exe version
+          else
+            ./dist/morphir-gleam version
+          fi
+
+      - name: Upload staging artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-${{ matrix.platform }}-${{ matrix.arch }}
+          path: dist/morphir-gleam*
+          retention-days: 7

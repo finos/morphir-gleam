@@ -13,7 +13,9 @@ pub fn command() -> glint.Command(Nil) {
   io.println("")
   io.println("Gleam tooling for Morphir - capturing business logic as data.")
   io.println("")
-  io.println("Morphir is a library of tools that work to capture business logic")
+  io.println(
+    "Morphir is a library of tools that work to capture business logic",
+  )
   io.println("as data, enabling code generation, documentation, and analysis")
   io.println("across multiple platforms and languages.")
   io.println("")

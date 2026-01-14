@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#MISE description="Run tests for all packages"
+set -e
+
+echo "Testing morphir_models..."
+cd packages/morphir_models
+gleam test
+
+echo ""
+echo "Testing morphir_cli..."
+cd ../morphir_cli
+gleam test --target javascript

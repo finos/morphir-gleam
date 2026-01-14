@@ -6,6 +6,9 @@ erl_crash.dump
 *.ez
 /packages/*/build/
 
+# Compiled executables
+dist/
+
 # dependencies
 website/node_modules
 

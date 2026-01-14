@@ -1,0 +1,80 @@
+#!/usr/bin/env bun
+//MISE description="Build CLI as standalone executable using bun"
+//MISE arg "target" help="Target platform (e.g., bun-linux-arm64, bun-windows-x64)"
+
+import { $ } from "bun";
+import { existsSync, mkdirSync } from "fs";
+import { join, dirname } from "path";
+
+// Get the absolute path to the project root
+// This script is in .config/mise/tasks/, so go up 3 levels
+const PROJECT_ROOT = join(dirname(import.meta.path), "..", "..", "..");
+const CLI_PACKAGE = join(PROJECT_ROOT, "packages", "morphir_cli");
+const DIST_DIR = join(PROJECT_ROOT, "dist");
+const OUTPUT_NAME = "morphir-gleam";
+
+// Parse command line arguments
+const target = process.argv.find((arg) => arg.startsWith("--target="))?.split("=")[1];
+
+async function main() {
+  const targetInfo = target ? ` for ${target}` : "";
+  console.log(`🏗️  Building morphir-cli as standalone executable${targetInfo}...\n`);
+  console.log(`📂 Project root: ${PROJECT_ROOT}`);
+  console.log(`📂 CLI package: ${CLI_PACKAGE}\n`);
+
+  // Step 1: Build the Gleam project for JavaScript target
+  console.log("📦 Compiling Gleam code to JavaScript...");
+
+  const buildResult = await $`cd ${CLI_PACKAGE} && gleam build --target javascript`.quiet();
+
+  if (buildResult.exitCode !== 0) {
+    console.error("❌ Gleam build failed");
+    process.exit(1);
+  }
+
+  console.log("✅ Gleam compilation complete\n");
+
+  // Step 2: Create dist directory if it doesn't exist
+  if (!existsSync(DIST_DIR)) {
+    console.log("📁 Creating dist directory...");
+    mkdirSync(DIST_DIR, { recursive: true });
+  }
+
+  // Step 3: Create a JavaScript entry point that calls main()
+  console.log("📝 Creating entry point script...");
+  const buildDir = join(CLI_PACKAGE, "build/dev/javascript/morphir_cli");
+  const morphirCliModule = join(buildDir, "morphir_cli.mjs");
+
+  if (!existsSync(morphirCliModule)) {
+    console.error(`❌ Error: morphir_cli module not found at ${morphirCliModule}`);
+    process.exit(1);
+  }
+
+  const entryPoint = join(buildDir, "cli-entry.mjs");
+  const entryPointCode = `#!/usr/bin/env node
+import { main } from "./morphir_cli.mjs";
+main();
+`;
+
+  await Bun.write(entryPoint, entryPointCode);
+
+  // Step 4: Build the executable with bun
+  const targetFlag = target ? `--target=${target}` : "";
+  console.log(`🔨 Building standalone executable with bun${targetInfo}...`);
+  const outputPath = join(DIST_DIR, OUTPUT_NAME);
+
+  if (targetFlag) {
+    await $`bun build ${entryPoint} --compile ${targetFlag} --outfile ${outputPath}`;
+  } else {
+    await $`bun build ${entryPoint} --compile --outfile ${outputPath}`;
+  }
+
+  console.log(`\n✅ Executable built successfully!`);
+  console.log(`📍 Location: ${outputPath}`);
+  console.log(`\n💡 Run with: ${outputPath}`);
+}
+
+main().catch((error) => {
+  console.error("❌ Build failed:", error);
+  process.exit(1);
+});

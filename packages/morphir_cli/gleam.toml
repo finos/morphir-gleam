@@ -2,7 +2,7 @@ name = "morphir_cli"
 version = "0.1.0"
 description = "Morphir CLI tooling for Gleam"
 licences = ["Apache-2.0"]
-target = "erlang"
+target = "javascript"
 
 [repository]
 type = "github"
@@ -12,11 +12,11 @@ path = "packages/morphir_cli"
 
 [dependencies]
 gleam_stdlib = ">= 0.34.0 and < 2.0.0"
-gleam_erlang = ">= 0.25.0 and < 1.0.0"
+gleam_javascript = ">= 0.11.0 and < 1.0.0"
 glint = ">= 1.0.0 and < 2.0.0"
 argv = ">= 1.0.0 and < 2.0.0"
 simplifile = ">= 2.0.0 and < 3.0.0"
-gleam_json = ">= 2.0.0 and < 3.0.0"
+gleam_json = ">= 3.0.0 and < 4.0.0"
 morphir_models = { path = "../morphir_models" }
 
 [dev-dependencies]

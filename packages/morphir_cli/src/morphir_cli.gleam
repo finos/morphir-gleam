@@ -15,20 +15,10 @@ pub fn main() {
   glint.new()
   |> glint.with_name("morphir-cli")
   |> glint.pretty_help(glint.default_pretty_help())
-  |> glint.group_flag(at: [], of: version.flag(), with: handle_version)
   |> glint.add(at: [], do: root_command())
   |> glint.add(at: ["about"], do: about.command())
+  |> glint.add(at: ["version"], do: version.command())
   |> glint.run(argv.load().arguments)
-}
-
-fn handle_version(version_flag: Bool) -> glint.CommandResult(Nil) {
-  case version_flag {
-    True -> {
-      io.println(version.version_string())
-      glint.Halt
-    }
-    False -> glint.Continue
-  }
 }
 
 fn root_command() -> glint.Command(Nil) {
@@ -39,5 +29,6 @@ fn root_command() -> glint.Command(Nil) {
   io.println("morphir-cli - Morphir tooling for Gleam")
   io.println("")
   io.println("Use --help to see available commands")
+  io.println("Use 'version' command to see version information")
   Nil
 }

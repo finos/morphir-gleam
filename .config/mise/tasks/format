@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#MISE description="Format all packages"
+set -e
+
+echo "Formatting morphir_models..."
+cd packages/morphir_models
+gleam format
+
+echo ""
+echo "Formatting morphir_cli..."
+cd ../morphir_cli
+gleam format

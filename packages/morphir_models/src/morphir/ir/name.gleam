@@ -6,7 +6,6 @@
 
 import gleam/list
 import gleam/string
-import gleam/regex
 
 /// A Name is a list of words represented as lowercase strings.
 /// Names can be converted to various naming conventions.
