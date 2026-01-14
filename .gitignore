@@ -9,6 +9,9 @@ erl_crash.dump
 # Compiled executables
 dist/
 
+# Beads issue tracker database
+.beads/
+
 # dependencies
 website/node_modules
 
