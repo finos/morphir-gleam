@@ -93,22 +93,27 @@ jobs:
             arch: x64
             runner: ubuntu-latest
             bun_target: bun-linux-x64
+            cross_compile: false
           - platform: linux
             arch: arm64
             runner: ubuntu-latest
             bun_target: bun-linux-arm64
+            cross_compile: true
           - platform: macos
             arch: x64
-            runner: macos-13
+            runner: macos-15-large  # Intel runner (macos-13 retired)
             bun_target: bun-darwin-x64
+            cross_compile: false
           - platform: macos
             arch: arm64
             runner: macos-14
             bun_target: bun-darwin-arm64
+            cross_compile: false
           - platform: windows
             arch: x64
             runner: windows-latest
             bun_target: bun-windows-x64
+            cross_compile: false
 
     steps:
       - name: Checkout code
@@ -142,9 +147,11 @@ jobs:
           fi
 
       - name: Build executable
+        shell: bash
         run: mise run build-exe -- --target=${{ matrix.bun_target }}
 
-      - name: Test executable
+      - name: Test executable (native builds only)
+        if: matrix.cross_compile == false
         shell: bash
         run: |
           if [ "${{ matrix.platform }}" = "windows" ]; then

@@ -56,36 +56,41 @@ jobs:
     strategy:
       matrix:
         include:
-          # Linux builds
+          # Linux builds (x64 native, arm64 cross-compiled)
           - platform: linux
             arch: x64
             runner: ubuntu-latest
             bun_target: bun-linux-x64
             artifact_name: morphir-gleam-linux-x64
+            cross_compile: false
           - platform: linux
             arch: arm64
             runner: ubuntu-latest
             bun_target: bun-linux-arm64
             artifact_name: morphir-gleam-linux-arm64
+            cross_compile: true
 
-          # macOS builds
+          # macOS builds (both native on respective architectures)
           - platform: macos
             arch: x64
-            runner: macos-13
+            runner: macos-15-large  # Intel runner (macos-13 retired)
             bun_target: bun-darwin-x64
             artifact_name: morphir-gleam-macos-x64
+            cross_compile: false
           - platform: macos
             arch: arm64
             runner: macos-14
             bun_target: bun-darwin-arm64
             artifact_name: morphir-gleam-macos-arm64
+            cross_compile: false
 
-          # Windows builds
+          # Windows builds (native x64)
           - platform: windows
             arch: x64
             runner: windows-latest
             bun_target: bun-windows-x64
             artifact_name: morphir-gleam-windows-x64.exe
+            cross_compile: false
           # Note: Windows ARM64 not yet supported by bun
           # - platform: windows
           #   arch: arm64
@@ -104,7 +109,18 @@ jobs:
           cache: true
 
       - name: Build executable
+        shell: bash
         run: mise run build-exe -- --target=${{ matrix.bun_target }}
+
+      - name: Test executable (native builds only)
+        if: matrix.cross_compile == false
+        shell: bash
+        run: |
+          if [ "${{ matrix.platform }}" = "windows" ]; then
+            ./dist/morphir-gleam.exe version
+          else
+            ./dist/morphir-gleam version
+          fi
 
       - name: Rename binary
         shell: bash
