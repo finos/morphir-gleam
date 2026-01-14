@@ -1,0 +1,16 @@
+name = "morphir_models"
+version = "0.1.0"
+description = "Gleam port of the Morphir IR (Intermediate Representation)"
+licences = ["Apache-2.0"]
+
+[repository]
+type = "github"
+user = "finos"
+repo = "morphir-gleam"
+path = "packages/morphir_models"
+
+[dependencies]
+gleam_stdlib = ">= 0.34.0 and < 2.0.0"
+
+[dev-dependencies]
+gleeunit = ">= 1.0.0 and < 2.0.0"

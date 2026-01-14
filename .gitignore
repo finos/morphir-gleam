@@ -1,3 +1,11 @@
+# Gleam build artifacts
+build/
+_build/
+erl_crash.dump
+*.beam
+*.ez
+/packages/*/build/
+
 # dependencies
 website/node_modules
 
