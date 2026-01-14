@@ -11,13 +11,40 @@ This directory contains GitHub Actions workflows for the morphir-gleam project.
 - Pull requests to `main` branch
 
 **Jobs:**
-- **Format check**: Ensures all code is properly formatted with `gleam format`
-- **Type check**: Validates types with `gleam check` (no compilation)
-- **Tests**: Runs all test suites for both packages
-- **Build**: Compiles all packages to ensure they build successfully
+
+1. **CI** (runs on all PRs and pushes):
+   - **Format check**: Ensures all code is properly formatted with `gleam format`
+   - **Type check**: Validates types with `gleam check` (no compilation)
+   - **Tests**: Runs all test suites for both packages
+   - **Build**: Compiles all packages to ensure they build successfully
+
+2. **Release Staging** (only runs on PRs from `release/**` branches):
+   - **CHANGELOG Validation**: Ensures CHANGELOG.md has been updated with release notes
+   - **Multi-platform Builds**: Builds executables for all target platforms
+     - Linux x64
+     - macOS x64 (Intel)
+     - macOS ARM64 (Apple Silicon)
+     - Windows x64
+   - **Executable Tests**: Verifies each built executable runs correctly
+   - **Artifact Upload**: Uploads staging builds (7-day retention)
 
 **Usage:**
-Runs automatically on every push and PR. All checks must pass before merging.
+- Standard CI runs automatically on every push and PR
+- Release staging only runs for PRs from branches matching `release/*`
+- All checks must pass before merging
+
+**Release Branch Workflow:**
+```bash
+# Create a release branch
+git checkout -b release/v0.1.0
+
+# Update CHANGELOG.md with release notes under [Unreleased]
+# Update version numbers in relevant files
+
+# Push and create PR
+git push -u origin release/v0.1.0
+# Create PR to main - this triggers release-staging validation
+```
 
 ---
 

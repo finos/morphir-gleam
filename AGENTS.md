@@ -219,6 +219,47 @@ test(fqname): add edge case tests
 - Feature branches: `feature/json-serialization`
 - Bug fixes: `fix/name-parsing`
 - Documentation: `docs/api-reference`
+- Release branches: `release/v0.1.0`
+
+### CHANGELOG Management
+
+This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
+
+**When making changes:**
+
+1. **Always update CHANGELOG.md** under the `[Unreleased]` section
+2. **Categorize changes** using these headers:
+   - `### Added` - New features
+   - `### Changed` - Changes to existing functionality
+   - `### Deprecated` - Features to be removed in future
+   - `### Removed` - Removed features
+   - `### Fixed` - Bug fixes
+   - `### Security` - Security fixes
+
+**Example:**
+```markdown
+## [Unreleased]
+
+### Added
+- New `parse_json` function for IR deserialization
+
+### Fixed
+- Handle empty path in `FQName.from_string`
+```
+
+**Release Process:**
+
+When creating a release branch (`release/v*`):
+1. Ensure CHANGELOG.md is up to date
+2. Create PR to main - triggers release staging checks
+3. After merge, tag the release: `git tag v0.1.0 && git push origin v0.1.0`
+
+**CI Enforcement:**
+
+PRs from `release/**` branches automatically validate:
+- ✅ CHANGELOG.md has `[Unreleased]` section
+- ✅ At least one change category has content
+- ✅ Executables build successfully on all platforms
 
 ## Critical Compliance Requirement
 
