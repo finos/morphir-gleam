@@ -97,7 +97,7 @@ The workflow will automatically create a release with binaries.
 
 **Artifacts:**
 Each release includes:
-- Platform-specific binaries (e.g., `morphir-cli-linux-x64`)
+- Platform-specific binaries (e.g., `morphir-gleam-linux-x64`)
 - `SHA256SUMS.txt` - checksums for verification
 
 ## Development Notes

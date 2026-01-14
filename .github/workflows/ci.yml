@@ -98,14 +98,14 @@ jobs:
         shell: bash
         run: |
           if [ "${{ matrix.platform }}" = "windows" ]; then
-            ./dist/morphir-cli.exe version
+            ./dist/morphir-gleam.exe version
           else
-            ./dist/morphir-cli version
+            ./dist/morphir-gleam version
           fi
 
       - name: Upload staging artifact
         uses: actions/upload-artifact@v4
         with:
           name: staging-${{ matrix.platform }}-${{ matrix.arch }}
-          path: dist/morphir-cli*
+          path: dist/morphir-gleam*
           retention-days: 7

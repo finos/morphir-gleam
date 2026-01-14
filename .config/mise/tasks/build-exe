@@ -10,7 +10,7 @@ import { join, dirname } from "path";
 const PROJECT_ROOT = join(dirname(import.meta.path), "..", "..", "..");
 const CLI_PACKAGE = join(PROJECT_ROOT, "packages", "morphir_cli");
 const DIST_DIR = join(PROJECT_ROOT, "dist");
-const OUTPUT_NAME = "morphir-cli";
+const OUTPUT_NAME = "morphir-gleam";
 
 async function main() {
   console.log("🏗️  Building morphir-cli as standalone executable...\n");
