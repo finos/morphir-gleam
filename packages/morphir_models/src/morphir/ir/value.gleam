@@ -32,7 +32,11 @@ pub type Pattern(a) {
   EmptyListPattern(attributes: a)
 
   /// Matches a non-empty list (e.g., `[head, ..tail]`)
-  HeadTailPattern(attributes: a, head_pattern: Pattern(a), tail_pattern: Pattern(a))
+  HeadTailPattern(
+    attributes: a,
+    head_pattern: Pattern(a),
+    tail_pattern: Pattern(a),
+  )
 
   /// Matches a literal value
   LiteralPattern(attributes: a, value: Literal)

@@ -1,9 +1,9 @@
 import gleeunit
 import gleeunit/should
+import morphir/ir/fqname
 import morphir/ir/name
 import morphir/ir/path
 import morphir/ir/qname
-import morphir/ir/fqname
 
 pub fn main() {
   gleeunit.main()
