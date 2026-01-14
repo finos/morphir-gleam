@@ -12,13 +12,14 @@ This directory contains GitHub Actions workflows for the morphir-gleam project.
 
 **Jobs:**
 
-1. **CI** (runs on all PRs and pushes):
-   - **Format check**: Ensures all code is properly formatted with `gleam format`
-   - **Type check**: Validates types with `gleam check` (no compilation)
-   - **Tests**: Runs all test suites for both packages
-   - **Build**: Compiles all packages to ensure they build successfully
+All CI jobs run in parallel for faster feedback:
 
-2. **Release Staging** (only runs on PRs from `release/**` branches):
+1. **Format Check**: Ensures all code is properly formatted with `gleam format`
+2. **Type Check**: Validates types with `gleam check` (no compilation)
+3. **Run Tests**: Runs all test suites for both packages
+4. **Build Packages**: Compiles all packages to ensure they build successfully
+
+5. **Release Staging** (only runs on PRs from `release/**` branches):
    - **CHANGELOG Validation**: Ensures CHANGELOG.md has been updated with release notes
    - **Multi-platform Builds**: Builds executables for all target platforms using cross-compilation
      - Linux x64
