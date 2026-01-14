@@ -2,47 +2,145 @@
 
 # Morphir Gleam
 
-Short blurb about what your project does.
+Gleam tooling for [Morphir](https://morphir.finos.org) and the Morphir ecosystem. This repository is a multi-module monorepo providing Gleam implementations of Morphir components.
+
+## Overview
+
+Morphir is a library of tools that work to capture business logic as data. This repository provides Gleam ports of Morphir components, taking advantage of Gleam's similarities to Elm (the language used in the reference implementation at [finos/morphir-elm](https://github.com/finos/morphir-elm)).
+
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| [morphir_models](./packages/morphir_models) | Gleam port of the Morphir IR (Intermediate Representation) |
+| [morphir_cli](./packages/morphir_cli) | CLI tooling for working with Morphir IR |
 
 ## Installation
 
-OS X & Linux:
+### Prerequisites
+
+This project uses [mise](https://mise.jdx.dev/) for tool version management.
 
 ```sh
-npm install my-crazy-module --save
+# Install mise (if not already installed)
+curl https://mise.run | sh
+
+# Install project dependencies (Gleam + Erlang)
+mise install
 ```
 
-Windows:
+### Building
 
 ```sh
-edit autoexec.bat
+# Build all packages
+cd packages/morphir_models && gleam build && cd ../..
+cd packages/morphir_cli && gleam build && cd ../..
+
+# Run tests
+cd packages/morphir_models && gleam test && cd ../..
+cd packages/morphir_cli && gleam test && cd ../..
 ```
 
-## Usage example
-
-A few motivating and useful examples of how your project can be used. Spice this up with code blocks and potentially screenshots / videos ([LiceCap](https://www.cockos.com/licecap/) is great for this kind of thing).
-
-_For more examples and usage, please refer to the [Wiki][wiki]._
-
-## Development setup
-
-Describe how to install all development dependencies and how to run an automated test-suite of some kind. Potentially do this for multiple platforms.
+### Running the CLI
 
 ```sh
-make install
-npm test
+cd packages/morphir_cli
+
+# Run the CLI
+gleam run
+
+# Show help
+gleam run -- --help
+
+# Show version
+gleam run -- --version
+
+# Show about information
+gleam run -- about
+```
+
+## Project Structure
+
+```
+morphir-gleam/
+├── .mise.toml              # Tool versions (Gleam 1.14.0, Erlang 27)
+├── packages/
+│   ├── morphir_models/     # Morphir IR types package
+│   │   ├── gleam.toml
+│   │   ├── src/
+│   │   │   ├── morphir_models.gleam
+│   │   │   └── morphir/ir/
+│   │   │       ├── name.gleam
+│   │   │       ├── path.gleam
+│   │   │       ├── qname.gleam
+│   │   │       ├── fqname.gleam
+│   │   │       ├── access_controlled.gleam
+│   │   │       ├── documented.gleam
+│   │   │       ├── literal.gleam
+│   │   │       ├── type_.gleam
+│   │   │       ├── value.gleam
+│   │   │       ├── module.gleam
+│   │   │       └── package.gleam
+│   │   └── test/
+│   └── morphir_cli/        # CLI tooling package
+│       ├── gleam.toml
+│       ├── src/
+│       │   ├── morphir_cli.gleam
+│       │   └── morphir_cli/commands/
+│       │       ├── about.gleam
+│       │       └── version.gleam
+│       └── test/
+└── README.md
+```
+
+## Usage Example
+
+```gleam
+import morphir/ir/name
+import morphir/ir/fqname
+import morphir/ir/type_
+
+// Create a name from various conventions
+let my_name = name.from_string("myVariableName")
+// Result: ["my", "variable", "name"]
+
+// Convert to different naming conventions
+name.to_snake_case(my_name)   // "my_variable_name"
+name.to_camel_case(my_name)   // "myVariableName"
+name.to_title_case(my_name)   // "MyVariableName"
+
+// Create fully qualified type references
+let int_type = fqname.fqn("Morphir.SDK", "Basics", "Int")
+
+// Build type expressions
+let string_type = type_.Reference(
+  Nil,
+  fqname.fqn("Morphir.SDK", "String", "String"),
+  [],
+)
 ```
 
 ## Roadmap
 
-List the roadmap steps; alternatively link the Confluence Wiki page where the project roadmap is published.
+1. ✅ Core IR types (Name, Path, QName, FQName)
+2. ✅ Type system (Type, Specification, Definition)
+3. ✅ Value system (Value, Pattern, Definition)
+4. ✅ Module and Package representations
+5. ✅ CLI tooling foundation (morphir_cli)
+6. 🔲 JSON serialization/deserialization
+7. 🔲 IR validation utilities
+8. 🔲 SDK type mappings
+9. 🔲 Code generation commands
 
-1. Item 1
-2. Item 2
-3. ....
+## Related Projects
+
+- [morphir-elm](https://github.com/finos/morphir-elm) - Reference Morphir implementation in Elm
+- [morphir](https://github.com/finos/morphir) - Next-gen Morphir tooling
+- [morphir.finos.org](https://morphir.finos.org) - Morphir documentation
 
 ## Contributing
-For any questions, bugs or feature requests please open an [issue](https://github.com/finos/morphir-gleam/issues)
+
+For any questions, bugs or feature requests please open an [issue](https://github.com/finos/morphir-gleam/issues).
 For anything else please send an email to morphir@finos.org.
 
 To submit a contribution:
