@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#MISE description="Run tests for all packages"
+set -e
+
+echo "Testing morphir_models..."
+cd packages/morphir_models
+gleam test

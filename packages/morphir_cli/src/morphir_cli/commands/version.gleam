@@ -1,5 +1,6 @@
 //// Version information for morphir-cli.
 
+import gleam/io
 import glint
 
 /// The current version of morphir-cli.
@@ -10,9 +11,11 @@ pub fn version_string() -> String {
   "morphir-cli " <> version
 }
 
-/// Creates a --version flag for the CLI.
-pub fn flag() -> glint.Flag(Bool) {
-  glint.bool_flag("version")
-  |> glint.flag_default(False)
-  |> glint.flag_help("Print version information")
+/// Creates the version command.
+pub fn command() -> glint.Command(Nil) {
+  use <- glint.command_help("Display version information")
+  use _named, _args, _flags <- glint.command()
+
+  io.println(version_string())
+  Nil
 }

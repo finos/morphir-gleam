@@ -36,7 +36,9 @@ morphir-gleam/
 │       ├── gleam.toml           # Package manifest
 │       ├── src/morphir/ir/      # IR type definitions
 │       └── test/                # Package tests
-├── .mise.toml                   # Tool versions (Gleam, Erlang)
+├── .config/mise/                # Tool configuration
+│   ├── config.toml              # Tool versions (Gleam, Erlang)
+│   └── tasks/                   # File-based mise tasks
 └── AGENTS.md                    # This file
 ```
 
@@ -119,6 +121,32 @@ curl https://mise.run | sh
 
 # Install Gleam and Erlang
 mise install
+```
+
+### Mise Configuration
+
+This project uses mise for tool version management and task automation.
+
+**Configuration Location**: `.config/mise/config.toml`
+- Tool versions (Gleam, Erlang) are specified here
+- This is the standard XDG-compliant location for mise configuration
+
+**Task Location**: `.config/mise/tasks/`
+- All tasks are file-based shell scripts in this directory
+- Tasks must be executable (`chmod +x`)
+- Use `#MISE description="..."` comment for task descriptions (note: no space after #)
+- Available tasks: `build`, `test`, `format`, `check`
+
+**Running Tasks**:
+```sh
+# List all available tasks
+mise tasks
+
+# Run a task
+mise run build
+mise run test
+mise run format
+mise run check
 ```
 
 ### Building and Testing

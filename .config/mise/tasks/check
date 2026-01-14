@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#MISE description="Check all packages without building"
+set -e
+
+echo "Checking morphir_models..."
+cd packages/morphir_models
+gleam check
