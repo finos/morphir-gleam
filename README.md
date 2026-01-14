@@ -17,46 +17,81 @@ Morphir is a library of tools that work to capture business logic as data. This 
 
 ## Installation
 
-### Prerequisites
+### Quick Install (Recommended)
 
-This project uses [mise](https://mise.jdx.dev/) for tool version management.
+Install the `morphir-gleam` CLI directly from GitHub releases:
+
+**Linux and macOS:**
+```sh
+# Install latest version
+curl -fsSL https://raw.githubusercontent.com/finos/morphir-gleam/main/install.sh | bash
+
+# Install specific version
+curl -fsSL https://raw.githubusercontent.com/finos/morphir-gleam/main/install.sh | bash -s v0.1.0
+```
+
+**Windows (PowerShell):**
+```powershell
+# Install latest version
+irm https://raw.githubusercontent.com/finos/morphir-gleam/main/install.ps1 | iex
+
+# Install specific version
+$env:VERSION="v0.1.0"; irm https://raw.githubusercontent.com/finos/morphir-gleam/main/install.ps1 | iex
+```
+
+### Manual Download
+
+Download pre-built binaries from the [releases page](https://github.com/finos/morphir-gleam/releases/latest):
+
+- **Linux x64**: `morphir-gleam-linux-x64`
+- **Linux ARM64**: `morphir-gleam-linux-arm64`
+- **macOS x64** (Intel): `morphir-gleam-macos-x64`
+- **macOS ARM64** (Apple Silicon): `morphir-gleam-macos-arm64`
+- **Windows x64**: `morphir-gleam-windows-x64.exe`
+
+After downloading:
+
+```sh
+# Linux/macOS: Make executable and move to PATH
+chmod +x morphir-gleam-*
+sudo mv morphir-gleam-* /usr/local/bin/morphir-gleam
+
+# Windows: Move to a directory in your PATH
+move morphir-gleam-windows-x64.exe C:\Windows\System32\morphir-gleam.exe
+```
+
+### Using the CLI
+
+```sh
+# Show help
+morphir-gleam --help
+
+# Show version
+morphir-gleam version
+
+# Show about information
+morphir-gleam about
+```
+
+### Building from Source
+
+If you want to contribute or build from source, you'll need [mise](https://mise.jdx.dev/) for tool version management.
 
 ```sh
 # Install mise (if not already installed)
 curl https://mise.run | sh
 
-# Install project dependencies (Gleam + Erlang)
+# Install project dependencies (Gleam, Erlang, Bun)
 mise install
-```
 
-### Building
-
-```sh
 # Build all packages
-cd packages/morphir_models && gleam build && cd ../..
-cd packages/morphir_cli && gleam build && cd ../..
+mise run build
 
 # Run tests
-cd packages/morphir_models && gleam test && cd ../..
-cd packages/morphir_cli && gleam test && cd ../..
-```
+mise run test
 
-### Running the CLI
-
-```sh
-cd packages/morphir_cli
-
-# Run the CLI
-gleam run
-
-# Show help
-gleam run -- --help
-
-# Show version
-gleam run -- --version
-
-# Show about information
-gleam run -- about
+# Build executable
+mise run build-exe
 ```
 
 ## Project Structure
