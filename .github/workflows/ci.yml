@@ -50,15 +50,23 @@ jobs:
           - platform: linux
             arch: x64
             runner: ubuntu-latest
+            bun_target: bun-linux-x64
+          - platform: linux
+            arch: arm64
+            runner: ubuntu-latest
+            bun_target: bun-linux-arm64
           - platform: macos
             arch: x64
             runner: macos-13
+            bun_target: bun-darwin-x64
           - platform: macos
             arch: arm64
             runner: macos-14
+            bun_target: bun-darwin-arm64
           - platform: windows
             arch: x64
             runner: windows-latest
+            bun_target: bun-windows-x64
 
     steps:
       - name: Checkout code
@@ -92,7 +100,7 @@ jobs:
           fi
 
       - name: Build executable
-        run: mise run build-exe
+        run: mise run build-exe -- --target=${{ matrix.bun_target }}
 
       - name: Test executable
         shell: bash

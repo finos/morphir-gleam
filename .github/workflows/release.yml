@@ -60,39 +60,37 @@ jobs:
           - platform: linux
             arch: x64
             runner: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
+            bun_target: bun-linux-x64
             artifact_name: morphir-gleam-linux-x64
-          # Note: Linux ARM64 requires self-hosted runner or cross-compilation
-          # Uncomment when GitHub provides ARM64 Linux runners or add self-hosted
-          # - platform: linux
-          #   arch: arm64
-          #   runner: ubuntu-latest
-          #   target: aarch64-unknown-linux-gnu
-          #   artifact_name: morphir-gleam-linux-arm64
+          - platform: linux
+            arch: arm64
+            runner: ubuntu-latest
+            bun_target: bun-linux-arm64
+            artifact_name: morphir-gleam-linux-arm64
 
           # macOS builds
           - platform: macos
             arch: x64
             runner: macos-13
-            target: x86_64-apple-darwin
+            bun_target: bun-darwin-x64
             artifact_name: morphir-gleam-macos-x64
           - platform: macos
             arch: arm64
             runner: macos-14
-            target: aarch64-apple-darwin
+            bun_target: bun-darwin-arm64
             artifact_name: morphir-gleam-macos-arm64
 
           # Windows builds
           - platform: windows
             arch: x64
             runner: windows-latest
-            target: x86_64-pc-windows-msvc
+            bun_target: bun-windows-x64
             artifact_name: morphir-gleam-windows-x64.exe
           # Note: Windows ARM64 not yet supported by bun
           # - platform: windows
           #   arch: arm64
           #   runner: windows-latest
-          #   target: aarch64-pc-windows-msvc
+          #   bun_target: bun-windows-arm64
           #   artifact_name: morphir-gleam-windows-arm64.exe
 
     steps:
@@ -106,13 +104,13 @@ jobs:
           cache: true
 
       - name: Build executable
-        run: mise run build-exe
+        run: mise run build-exe -- --target=${{ matrix.bun_target }}
 
       - name: Rename binary
         shell: bash
         run: |
           if [ "${{ matrix.platform }}" = "windows" ]; then
-            mv dist/morphir-gleam dist/${{ matrix.artifact_name }}
+            mv dist/morphir-gleam.exe dist/${{ matrix.artifact_name }}
           else
             mv dist/morphir-gleam dist/${{ matrix.artifact_name }}
           fi

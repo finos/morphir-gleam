@@ -31,7 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI/CD workflows
   - GitHub Actions CI workflow (format, check, test, build)
   - GitHub Actions release workflow with multi-platform builds
-  - Platform support: Linux x64, macOS x64/ARM64, Windows x64
+  - Cross-compilation support using bun's --target flag (since bun v1.1.5)
+  - Platform support: Linux x64/ARM64, macOS x64/ARM64, Windows x64
+  - Release staging job validates CHANGELOG and builds for all platforms on release PRs
 
 ### Changed
 

@@ -20,8 +20,9 @@ This directory contains GitHub Actions workflows for the morphir-gleam project.
 
 2. **Release Staging** (only runs on PRs from `release/**` branches):
    - **CHANGELOG Validation**: Ensures CHANGELOG.md has been updated with release notes
-   - **Multi-platform Builds**: Builds executables for all target platforms
+   - **Multi-platform Builds**: Builds executables for all target platforms using cross-compilation
      - Linux x64
+     - Linux ARM64
      - macOS x64 (Intel)
      - macOS ARM64 (Apple Silicon)
      - Windows x64
@@ -59,8 +60,9 @@ git push -u origin release/v0.1.0
 
 1. **CI Checks**: Runs full CI suite (format, check, test, build)
 
-2. **Build Binaries**: Creates platform-specific executables
+2. **Build Binaries**: Creates platform-specific executables using cross-compilation
    - Linux x64
+   - Linux ARM64
    - macOS x64 (Intel)
    - macOS ARM64 (Apple Silicon)
    - Windows x64
@@ -72,7 +74,7 @@ git push -u origin release/v0.1.0
 
 **Supported Platforms:**
 - ✅ Linux x64
-- ⏳ Linux ARM64 (commented out - requires self-hosted runner)
+- ✅ Linux ARM64 (via bun cross-compilation)
 - ✅ macOS x64 (Intel)
 - ✅ macOS ARM64 (Apple Silicon)
 - ✅ Windows x64
@@ -102,21 +104,33 @@ Each release includes:
 
 ## Development Notes
 
+### Cross-Compilation
+
+This project uses bun's built-in cross-compilation support (available since bun v1.1.5) to build executables for multiple platforms. The `build-exe` mise task accepts a `--target` parameter to specify the target platform:
+
+```bash
+# Build for Linux ARM64 on any platform
+mise run build-exe -- --target=bun-linux-arm64
+
+# Build for Windows x64 on any platform
+mise run build-exe -- --target=bun-windows-x64
+```
+
+**Supported bun targets:**
+- `bun-linux-x64` - Linux x86_64
+- `bun-linux-arm64` - Linux ARM64
+- `bun-darwin-x64` - macOS Intel
+- `bun-darwin-arm64` - macOS Apple Silicon
+- `bun-windows-x64` - Windows x64
+
 ### Adding New Platforms
 
 To add support for additional platforms:
 
-1. Add a new matrix entry in `release.yml`
-2. Ensure the platform has bun support
-3. Specify the correct runner and target triple
+1. Add a new matrix entry in both `release.yml` and `ci.yml`
+2. Ensure the platform has bun cross-compilation support
+3. Specify the correct runner and `bun_target`
 4. Update this README
-
-### Cross-Compilation
-
-For platforms without native GitHub runners:
-- Use cross-compilation tools
-- Add self-hosted runners
-- Use QEMU for emulation (slower)
 
 ### Testing Workflows Locally
 
