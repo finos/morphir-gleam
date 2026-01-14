@@ -146,9 +146,15 @@ jobs:
             exit 1
           fi
 
-      - name: Build executable
+      - name: Build executable (non-Windows)
+        if: matrix.platform != 'windows'
         shell: bash
         run: mise run build-exe -- --target=${{ matrix.bun_target }}
+
+      - name: Build executable (Windows - direct bun call)
+        if: matrix.platform == 'windows'
+        shell: bash
+        run: bun .config/mise/tasks/build-exe --target=${{ matrix.bun_target }}
 
       - name: Test executable (native builds only)
         if: matrix.cross_compile == false
