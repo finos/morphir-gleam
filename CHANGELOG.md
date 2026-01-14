@@ -34,7 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Cross-compilation support using bun's --target flag (since bun v1.1.5)
   - Platform support: Linux x64/ARM64, macOS x64/ARM64, Windows x64
   - Release staging job validates CHANGELOG and builds for all platforms on release PRs
-- Installation scripts
+- Installation options
+  - Mise integration via github backend (`mise use -g github:finos/morphir-gleam`)
   - Bash install script for Linux and macOS (`install.sh`)
   - PowerShell install script for Windows (`install.ps1`)
   - Support for installing latest version or specific version

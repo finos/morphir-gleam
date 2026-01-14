@@ -19,6 +19,25 @@ Morphir is a library of tools that work to capture business logic as data. This 
 
 ### Quick Install (Recommended)
 
+#### Using mise (Recommended for developers)
+
+If you have [mise](https://mise.jdx.dev/) installed, you can install `morphir-gleam` as a global tool:
+
+```sh
+# Install latest version
+mise use -g github:finos/morphir-gleam
+
+# Install specific version
+mise use -g github:finos/morphir-gleam@v0.1.0
+
+# Verify installation
+morphir-gleam version
+```
+
+This automatically downloads the correct binary for your platform and manages it through mise.
+
+#### Using install scripts
+
 Install the `morphir-gleam` CLI directly from GitHub releases:
 
 **Linux and macOS:**
