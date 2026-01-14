@@ -1,0 +1,20 @@
+name = "morphir_config"
+version = "0.1.0"
+description = "Morphir configuration file parsing and validation (morphir.toml)"
+licences = ["Apache-2.0"]
+
+[repository]
+type = "github"
+user = "finos"
+repo = "morphir-gleam"
+path = "packages/morphir_config"
+
+[dependencies]
+gleam_stdlib = ">= 0.34.0 and < 2.0.0"
+gleam_json = ">= 3.0.0 and < 4.0.0"
+tom = ">= 1.0.0 and < 2.0.0"
+simplifile = ">= 2.0.0 and < 3.0.0"
+morphir_models = { path = "../morphir_models" }
+
+[dev-dependencies]
+gleeunit = ">= 1.0.0 and < 2.0.0"

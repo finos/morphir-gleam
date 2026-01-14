@@ -1,0 +1,21 @@
+name = "morphir_tooling"
+version = "0.1.0"
+description = "Morphir workspace and project management utilities"
+licences = ["Apache-2.0"]
+
+[repository]
+type = "github"
+user = "finos"
+repo = "morphir-gleam"
+path = "packages/morphir_tooling"
+
+[dependencies]
+gleam_stdlib = ">= 0.34.0 and < 2.0.0"
+gleam_json = ">= 3.0.0 and < 4.0.0"
+simplifile = ">= 2.0.0 and < 3.0.0"
+filepath = ">= 1.0.0 and < 2.0.0"
+morphir_models = { path = "../morphir_models" }
+morphir_config = { path = "../morphir_config" }
+
+[dev-dependencies]
+gleeunit = ">= 1.0.0 and < 2.0.0"
