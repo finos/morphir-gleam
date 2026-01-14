@@ -13,6 +13,7 @@ Morphir is a library of tools that work to capture business logic as data. This 
 | Package | Description |
 |---------|-------------|
 | [morphir_models](./packages/morphir_models) | Gleam port of the Morphir IR (Intermediate Representation) |
+| [morphir_cli](./packages/morphir_cli) | CLI tooling for working with Morphir IR |
 
 ## Installation
 
@@ -32,11 +33,30 @@ mise install
 
 ```sh
 # Build all packages
-cd packages/morphir_models
-gleam build
+cd packages/morphir_models && gleam build && cd ../..
+cd packages/morphir_cli && gleam build && cd ../..
 
 # Run tests
-gleam test
+cd packages/morphir_models && gleam test && cd ../..
+cd packages/morphir_cli && gleam test && cd ../..
+```
+
+### Running the CLI
+
+```sh
+cd packages/morphir_cli
+
+# Run the CLI
+gleam run
+
+# Show help
+gleam run -- --help
+
+# Show version
+gleam run -- --version
+
+# Show about information
+gleam run -- about
 ```
 
 ## Project Structure
@@ -45,23 +65,30 @@ gleam test
 morphir-gleam/
 ├── .mise.toml              # Tool versions (Gleam 1.14.0, Erlang 27)
 ├── packages/
-│   └── morphir_models/     # Morphir IR types package
+│   ├── morphir_models/     # Morphir IR types package
+│   │   ├── gleam.toml
+│   │   ├── src/
+│   │   │   ├── morphir_models.gleam
+│   │   │   └── morphir/ir/
+│   │   │       ├── name.gleam
+│   │   │       ├── path.gleam
+│   │   │       ├── qname.gleam
+│   │   │       ├── fqname.gleam
+│   │   │       ├── access_controlled.gleam
+│   │   │       ├── documented.gleam
+│   │   │       ├── literal.gleam
+│   │   │       ├── type_.gleam
+│   │   │       ├── value.gleam
+│   │   │       ├── module.gleam
+│   │   │       └── package.gleam
+│   │   └── test/
+│   └── morphir_cli/        # CLI tooling package
 │       ├── gleam.toml
 │       ├── src/
-│       │   ├── morphir_models.gleam
-│       │   └── morphir/
-│       │       └── ir/
-│       │           ├── name.gleam
-│       │           ├── path.gleam
-│       │           ├── qname.gleam
-│       │           ├── fqname.gleam
-│       │           ├── access_controlled.gleam
-│       │           ├── documented.gleam
-│       │           ├── literal.gleam
-│       │           ├── type_.gleam
-│       │           ├── value.gleam
-│       │           ├── module.gleam
-│       │           └── package.gleam
+│       │   ├── morphir_cli.gleam
+│       │   └── morphir_cli/commands/
+│       │       ├── about.gleam
+│       │       └── version.gleam
 │       └── test/
 └── README.md
 ```
@@ -99,9 +126,11 @@ let string_type = type_.Reference(
 2. ✅ Type system (Type, Specification, Definition)
 3. ✅ Value system (Value, Pattern, Definition)
 4. ✅ Module and Package representations
-5. 🔲 JSON serialization/deserialization
-6. 🔲 IR validation utilities
-7. 🔲 SDK type mappings
+5. ✅ CLI tooling foundation (morphir_cli)
+6. 🔲 JSON serialization/deserialization
+7. 🔲 IR validation utilities
+8. 🔲 SDK type mappings
+9. 🔲 Code generation commands
 
 ## Related Projects
 
