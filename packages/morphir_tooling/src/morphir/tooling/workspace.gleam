@@ -3,13 +3,11 @@
 ////
 
 import filepath
-import gleam/list
-import gleam/option.{type Option, None, Some}
+import gleam/option.{None, Some}
 import gleam/result
-import gleam/string
+import morphir/config/parser
 import morphir_config
-import morphir_config/parser as config_parser
-import morphir_tooling.{type Project, type Workspace, Project, Workspace}
+import morphir_tooling.{type Project, type Workspace, Workspace}
 import simplifile
 
 /// Find the workspace root by searching for morphir.toml in current dir and ancestors
@@ -37,10 +35,10 @@ pub fn load_workspace_config(
     filepath.join(workspace_root, ".morphir/morphir.toml")
 
   // Try primary location first, then .morphir subdirectory
-  case config_parser.parse_file(config_path) {
+  case parser.parse_file(config_path) {
     Ok(config) -> Ok(config)
     Error(_) ->
-      case config_parser.parse_file(alt_config_path) {
+      case parser.parse_file(alt_config_path) {
         Ok(config) -> Ok(config)
         Error(err) ->
           Error("No morphir.toml found at " <> config_path <> " or " <> alt_config_path <> ": " <> err)
@@ -50,11 +48,11 @@ pub fn load_workspace_config(
 
 /// Discover member projects based on workspace configuration
 fn discover_members(
-  workspace_root: String,
+  _workspace_root: String,
   config: morphir_config.MorphirConfig,
 ) -> List(Project) {
   // Extract member patterns from workspace config
-  let member_patterns = case config.workspace {
+  let _member_patterns = case config.workspace {
     Some(ws) ->
       case ws.members {
         Some(patterns) -> patterns
@@ -85,10 +83,17 @@ fn find_morphir_toml_recursive(
       let config_path = filepath.join(dir, "morphir.toml")
       let alt_config_path = filepath.join(dir, ".morphir/morphir.toml")
 
-      case
-        simplifile.is_file(config_path)
-        || simplifile.is_file(alt_config_path)
-      {
+      let has_config = case simplifile.is_file(config_path) {
+        Ok(True) -> True
+        _ -> False
+      }
+
+      let has_alt_config = case simplifile.is_file(alt_config_path) {
+        Ok(True) -> True
+        _ -> False
+      }
+
+      case has_config || has_alt_config {
         True -> Ok(dir)
         False -> {
           // Try parent directory

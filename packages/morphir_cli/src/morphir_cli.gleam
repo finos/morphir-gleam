@@ -8,7 +8,9 @@ import argv
 import gleam/io
 import glint
 import morphir_cli/commands/about
+import morphir_cli/commands/project
 import morphir_cli/commands/version
+import morphir_cli/commands/workspace
 
 /// Main entry point for the morphir-cli.
 pub fn main() {
@@ -18,6 +20,10 @@ pub fn main() {
   |> glint.add(at: [], do: root_command())
   |> glint.add(at: ["about"], do: about.command())
   |> glint.add(at: ["version"], do: version.command())
+  |> glint.add(at: ["workspace"], do: workspace.command())
+  |> glint.add(at: ["workspace", "init"], do: workspace.init_command())
+  |> glint.add(at: ["project"], do: project.command())
+  |> glint.add(at: ["project", "list"], do: project.list_command())
   |> glint.run(argv.load().arguments)
 }
 
