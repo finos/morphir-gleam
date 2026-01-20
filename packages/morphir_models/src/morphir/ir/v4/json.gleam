@@ -4,7 +4,7 @@
 //// to and from JSON.
 
 import gleam/dict
-import gleam/dynamic
+
 import gleam/dynamic/decode
 import gleam/json
 import gleam/list
@@ -20,8 +20,12 @@ import morphir/ir/v4/distribution as dist
 import morphir/ir/v4/type_ as t
 import morphir/ir/v4/value as v
 
+@external(erlang, "morphir_models_ffi", "coerce")
+@external(javascript, "./../../../morphir_models_ffi.mjs", "coerce")
+fn unsafe_coerce(x: a) -> b
+
 fn unsafe_zero() -> a {
-  dynamic.from(Nil) |> dynamic.unsafe_coerce
+  unsafe_coerce(Nil)
 }
 
 // --- Encoders ---
@@ -1460,7 +1464,7 @@ pub fn decode_value_definition(
           )),
         )
         |> decode.map(v.Definition)
-      _ -> decode.failure(v.Definition(ac.public(todo)), "Definition")
+      _ -> decode.failure(unsafe_zero(), "Definition")
     }
   })
 }
