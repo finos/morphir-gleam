@@ -2,10 +2,10 @@
 ////
 //// This module defines the types for representing type expressions in the IR v4.
 
+import gleam/option.{type Option}
 import morphir/ir/access_controlled.{type AccessControlled}
 import morphir/ir/fqname.{type FQName}
 import morphir/ir/name.{type Name}
-import gleam/option.{type Option}
 
 /// A field in a record type.
 pub type Field(a) {
