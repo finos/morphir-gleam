@@ -37,9 +37,7 @@ import morphir/ir/access_controlled
 import morphir/ir/documented
 import morphir/ir/fqname
 import morphir/ir/literal
-import morphir/ir/module
 import morphir/ir/name
-import morphir/ir/package
 import morphir/ir/path
 import morphir/ir/qname
 import morphir/ir/type_
