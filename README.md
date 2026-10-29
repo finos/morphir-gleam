@@ -129,6 +129,7 @@ Complete the pinned SDK once on Linux/macOS:
 ```sh
 curl -fsSL https://cli.moonbitlang.com/install/unix.sh | \
   MOON_HOME="$(mise where http:moonbit)" bash -s -- "$(mise current http:moonbit)"
+mise exec -- moon update
 ```
 
 On Windows, run the matching official installer in PowerShell:
@@ -137,6 +138,7 @@ On Windows, run the matching official installer in PowerShell:
 $env:MOON_HOME = mise where http:moonbit
 $env:MOONBIT_INSTALL_VERSION = mise current http:moonbit
 Invoke-RestMethod https://cli.moonbitlang.com/install/powershell.ps1 | Invoke-Expression
+mise exec -- moon update
 ```
 
 ```sh

@@ -48,6 +48,7 @@ jobs:
           set -euo pipefail
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | \
             MOON_HOME="$(mise where http:moonbit)" bash -s -- "$(mise current http:moonbit)"
+          mise exec -- moon update
 
       - name: Check OpenSpec snapshots, schema and workflow
         run: |
