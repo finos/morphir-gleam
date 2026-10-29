@@ -201,6 +201,24 @@ When building CLI tools:
 
 This separation enables proper shell piping: `morphir-gleam generate | jq .`
 
+## OpenSpec workflow
+
+Use the shared `html-design` schema for new change proposals. Start with the
+`openspec-propose` skill, then use `openspec-apply-change`, `openspec-update-change`,
+`openspec-sync-specs`, and `openspec-archive-change` as the change progresses.
+`openspec-explore` supports investigation before a proposal.
+
+Design artifacts are standalone `design.html` files with inline CSS and SVG.
+Keep Morphir/Gleam context and FINOS contribution policy in `openspec/config.yaml`
+and this file. Track work in GitHub issues; follow CONTRIBUTING.md for review and CLA.
+
+The schema, templates, checker and Gherkin feature are managed snapshots from
+`moonrockz/mission-control`'s `apps/openspec-ext`. Do not edit those files locally.
+Run `mise run openspec:check`, `mise run openspec:validate`, and
+`mise run openspec:test` after OpenSpec changes. Run `mise run openspec:setup` to
+regenerate the six core skills without changing personal OpenSpec settings.
+See README.md for the pinned tooling setup.
+
 ## Git Workflow
 
 ### Commit Messages
