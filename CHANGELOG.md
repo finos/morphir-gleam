@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- None
+- Shared OpenSpec html-design extension, locked templates, core agent skills,
+  contributor tasks, and CI validation.
 
 ### Changed
 

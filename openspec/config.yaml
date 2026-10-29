@@ -1,0 +1,15 @@
+schema: html-design
+githubCopilot:
+  cloudAgent: false
+context: |
+  morphir-gleam implements the FINOS Morphir intermediate representation and
+  tooling in Gleam. packages/morphir_models holds core IR types;
+  packages/morphir_cli provides the JavaScript-target CLI.
+  Reference finos/morphir-elm for IR compatibility. Prefer immutable values,
+  exhaustive pattern matching, Result for errors, and Option for absence.
+  Tool versions and file-based tasks live in .config/mise/.
+  Track work in GitHub issues and submit contributions through pull requests,
+  following CONTRIBUTING.md, AGENTS.md, and the FINOS CLA requirements.
+  Update CHANGELOG.md under Unreleased for changes.
+  Use the shared html-design schema for new changes and keep repository policy
+  in this config and AGENTS.md. Do not edit managed schema templates.
