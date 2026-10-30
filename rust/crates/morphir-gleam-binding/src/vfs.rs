@@ -1,14 +1,70 @@
 //! Filesystem boundary for native callers and the sandboxed WASM guest.
 //!
-//! Native visitors retain the shared VFS API. The guest keeps generated files
-//! in memory and rejects attempts to access an operating system filesystem.
+//! Both targets use the same [`Vfs`] trait and in-memory [`MemoryVfs`]. Native
+//! callers get an [`OsVfs`] backed by `std::fs`. The guest keeps generated files
+//! in memory and its [`OsVfs`] rejects access to an operating system filesystem.
+pub use portable::{MemoryVfs, Vfs};
+
 #[cfg(not(target_arch = "wasm32"))]
-pub use morphir_common::vfs::{MemoryVfs, OsVfs, Vfs};
+pub use native::OsVfs;
 
 #[cfg(target_arch = "wasm32")]
-pub use portable::{MemoryVfs, OsVfs, Vfs};
+pub use portable::OsVfs;
 
-#[cfg(any(target_arch = "wasm32", test))]
+#[cfg(not(target_arch = "wasm32"))]
+mod native {
+    use super::Vfs;
+    use std::fs;
+    use std::io::Result;
+    use std::path::{Path, PathBuf};
+
+    /// Operating system filesystem for native callers.
+    pub struct OsVfs;
+
+    impl Vfs for OsVfs {
+        fn read_to_string(&self, path: &Path) -> Result<String> {
+            fs::read_to_string(path)
+        }
+        fn write_from_string(&self, path: &Path, content: &str) -> Result<()> {
+            if let Some(parent) = path.parent() {
+                fs::create_dir_all(parent)?;
+            }
+            fs::write(path, content)
+        }
+        fn exists(&self, path: &Path) -> bool {
+            path.exists()
+        }
+        fn list_dir(&self, path: &Path) -> Result<Vec<PathBuf>> {
+            fs::read_dir(path)?
+                .map(|entry| entry.map(|entry| entry.path()))
+                .collect()
+        }
+        fn create_dir_all(&self, path: &Path) -> Result<()> {
+            fs::create_dir_all(path)
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn native_os_files_round_trip() {
+            let dir = tempfile::tempdir().unwrap();
+            let path = dir.path().join("generated/nested/model.gleam");
+            OsVfs.write_from_string(&path, "pub type T = Int").unwrap();
+            assert_eq!(OsVfs.read_to_string(&path).unwrap(), "pub type T = Int");
+            assert!(OsVfs.exists(&dir.path().join("generated")));
+            assert_eq!(
+                OsVfs
+                    .list_dir(&dir.path().join("generated/nested"))
+                    .unwrap(),
+                vec![path]
+            );
+        }
+    }
+}
+
 mod portable {
     use std::collections::BTreeMap;
     use std::io::{Error, ErrorKind, Result};
@@ -92,6 +148,7 @@ mod portable {
             .collect()
     }
 
+    #[cfg(any(target_arch = "wasm32", test))]
     fn unsupported<T>() -> Result<T> {
         Err(Error::new(
             ErrorKind::Unsupported,
@@ -100,7 +157,9 @@ mod portable {
     }
 
     /// The guest has no operating system filesystem capability.
+    #[cfg(any(target_arch = "wasm32", test))]
     pub struct OsVfs;
+    #[cfg(any(target_arch = "wasm32", test))]
     impl Vfs for OsVfs {
         fn read_to_string(&self, _path: &Path) -> Result<String> {
             unsupported()

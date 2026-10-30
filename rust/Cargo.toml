@@ -1,0 +1,30 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.98"
+authors = ["FINOS <info@finos.org>"]
+license = "Apache-2.0"
+repository = "https://github.com/finos/morphir-gleam"
+homepage = "https://github.com/finos/morphir-gleam"
+documentation = "https://github.com/finos/morphir-gleam/tree/main/rust/crates/morphir-gleam-binding"
+keywords = ["morphir", "gleam", "functional", "domain-modeling", "ir"]
+categories = ["development-tools", "parsers"]
+
+[workspace.dependencies]
+url = "2.5.8"
+percent-encoding = "2.3.2"
+tempfile = "3"
+cap-std = "4.0.0"
+cap-fs-ext = "4.0.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+
+[profile.dev]
+opt-level = 0
+debug = true

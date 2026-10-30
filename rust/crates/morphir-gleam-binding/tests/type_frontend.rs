@@ -16,9 +16,9 @@ pub type Handler = fn(customer.Customer, List(Buyer)) -> Result(Nil, String)
 
 #[test]
 fn preserves_type_documentation_labels_and_function_parameter_types() {
-    use morphir_common::vfs::MemoryVfs;
     use morphir_core::naming::{ModuleName, PackageName};
     use morphir_gleam_binding::frontend::GleamToMorphirVisitor;
+    use morphir_gleam_binding::vfs::MemoryVfs;
     let module = parse_gleam("models.gleam", "/// Wrapped\npub opaque type Box(a) { Box(value: a) }\npub fn id(value: Int) -> Int { value }").unwrap();
     let visitor = GleamToMorphirVisitor::new(
         MemoryVfs::new(),
@@ -130,7 +130,6 @@ fn comparison_distinguishes_constructor_labels_and_opacity() {
 
 #[test]
 fn resolves_baseline_and_dependency_types_in_single_module_mode() {
-    use morphir_common::vfs::MemoryVfs;
     use morphir_core::{
         ir::v4::{Access, PackageDefinition},
         naming::{ModuleName, PackageName},
@@ -139,6 +138,7 @@ fn resolves_baseline_and_dependency_types_in_single_module_mode() {
         GleamToMorphirVisitor,
         resolver::{resolve_modules, resolve_one},
     };
+    use morphir_gleam_binding::vfs::MemoryVfs;
     let package = PackageName::parse("demo");
     let original = parse_gleam(
         "domain/customer.gleam",

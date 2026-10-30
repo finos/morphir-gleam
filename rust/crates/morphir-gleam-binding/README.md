@@ -5,10 +5,15 @@ and supports incremental compilation through the Morphir Extension Protocol.
 Its extension identifier is `morphir-gleam`. The Rust crate and WASM artifact
 remain `morphir-gleam-binding`.
 
-The Morphir CLI includes the extension as a native Rust provider. Compilation
-and generation use direct in-process calls by default, without installing an
-extension or running a Gleam executable. The same implementation supports MEP
-invocation and an optional WASM package.
+This crate moved from finos/morphir-rust (`crates/morphir-gleam-binding`) to
+finos/morphir-gleam (`rust/crates/morphir-gleam-binding`) with its history. Each
+imported commit names its original commit in an `Imported-from:` trailer. The
+move is planned in the OpenSpec change `move-gleam-extension`. That change also
+replaces the Extism module with a core-Wasm guest for the MoonBit Morphir CLI.
+
+The Rust Morphir CLI in finos/morphir links this crate as a native provider.
+That CLI is being sunset. The same implementation supports MEP invocation and a
+WASM package.
 
 For a Gleam project, select it explicitly with:
 
@@ -110,19 +115,23 @@ Changes to the parser or value-lowering semantics invalidate older baselines.
 
 ## Verification and packaging
 
-From the Rust workspace:
+From the repository root, with the Rust tools of the `rust` mise environment:
 
 ```sh
-cargo test -p morphir-gleam-binding
-cargo build --release -p morphir-gleam-binding --target wasm32-unknown-unknown
-MORPHIR_GLEAM_GUEST=target/wasm32-unknown-unknown/release/morphir_gleam_binding.wasm \
-  cargo test -p morphir-gleam-binding --features wasm-host-tests --test wasm -- --ignored
+MISE_ENV=rust mise install
+MISE_ENV=rust mise run rust:fmt     # add --fix to format
+MISE_ENV=rust mise run rust:lint
+MISE_ENV=rust mise run rust:test
+MISE_ENV=rust mise run rust:wasm    # build, validate and compare guest with native
 ```
 
-`mise run extension:artifact:gleam` runs the native suite, builds and validates
-the release WASM, compares guest results with native results, packages the
-bundle, and tests installation and use without the original package repository.
-The bundle is staged under `.morphir/build/extensions/gleam`.
+`ring`, a dependency of `gleam-core`, compiles C for `wasm32-unknown-unknown`.
+Apple clang cannot do this. On macOS, install LLVM (`brew install llvm`); the
+tasks use it automatically. Linux clang works as it is.
+
+The bundle release workflow of this repository is added by the
+`move-gleam-extension` change. Until then, `extension/gleam/v0.3.0` in
+finos/morphir-rust is the latest released bundle.
 
 When Gleam is installed, verify generated records, aliases and sum types with:
 
@@ -142,13 +151,7 @@ code path requests entropy.
 
 ### Bundle descriptor compatibility
 
-Newly built bundles include a version-2 `release.json` with capability claims
-read from the exact WASM being packaged and checked against
-`.github/extensions.toml`. Publishing requires Morphir CLI `0.4.0-beta.7` or
-later; older CLIs cannot read this descriptor. The versioned WASM and
-`.wasm.sha256` names are unchanged. The downloaded descriptor is still named
-`<artifact-base>-<version>.release.json`; rename it to `release.json` before
-publishing. WASM installs show `Claims: unchecked`.
-
-See the [packaging contract](../../docs/extensions/capability-claims.md#packaging-wasm-extensions)
+The `0.3.0` bundle from finos/morphir-rust has a version-2 `release.json`.
+Publishing it requires Morphir CLI `0.4.0-beta.7` or later. See the
+[packaging contract](https://github.com/finos/morphir-rust/blob/main/docs/extensions/capability-claims.md#packaging-wasm-extensions)
 for the descriptor shape and provenance rules.

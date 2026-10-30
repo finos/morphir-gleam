@@ -9,11 +9,11 @@ mod cli_helpers;
 mod coverage;
 
 use cucumber::{World, given, then, when};
-#[allow(unused_imports)]
-use morphir_common::vfs::{MemoryVfs, Vfs};
 use morphir_core::naming::{ModuleName, PackageName};
 use morphir_gleam_binding::frontend::ast::ModuleIR;
 use morphir_gleam_binding::frontend::{GleamToMorphirVisitor, parse_gleam};
+#[allow(unused_imports)]
+use morphir_gleam_binding::vfs::{MemoryVfs, Vfs};
 use std::path::PathBuf;
 use tempfile::TempDir;
 
@@ -195,8 +195,8 @@ async fn i_load_real_world_fixture(w: &mut GleamTestWorld, fixture_name: String)
 
 #[when(expr = "I convert IR V4 Document Tree back to Gleam source {string}")]
 async fn convert_from_ir_v4(w: &mut GleamTestWorld, output_file: String) {
-    use morphir_common::vfs::MemoryVfs;
     use morphir_gleam_binding::backend::visitor::MorphirToGleamVisitor;
+    use morphir_gleam_binding::vfs::MemoryVfs;
 
     // For now, simplified - would need to load IR V4 from document tree
     // This is a placeholder implementation

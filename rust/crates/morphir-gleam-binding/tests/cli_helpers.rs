@@ -4,7 +4,6 @@
 
 use anyhow::Result;
 #[allow(unused_imports)]
-use morphir_common::vfs::Vfs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use tempfile::TempDir;
@@ -298,22 +297,4 @@ pub fn assert_morphir_structure(morphir_dir: &Path, project: &str) {
         project,
         out_dir
     );
-}
-
-/// Create a NotebookVfs from a test notebook file
-pub fn create_notebook_vfs(notebook_path: &Path) -> Result<morphir_common::vfs::NotebookVfs> {
-    Ok(morphir_common::vfs::NotebookVfs::from_file(notebook_path)?)
-}
-
-/// Assert that a notebook contains a file with the given path
-pub fn assert_notebook_contains_file(
-    notebook: &morphir_common::vfs::NotebookVfs,
-    file_path: &Path,
-) -> Result<()> {
-    assert!(
-        notebook.exists(file_path),
-        "Notebook does not contain file: {:?}",
-        file_path
-    );
-    Ok(())
 }
