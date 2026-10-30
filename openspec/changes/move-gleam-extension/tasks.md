@@ -13,10 +13,10 @@ against `main`, in order.
 - [x] 1.4 Add `rust/Cargo.toml` (workspace), `rust/rust-toolchain.toml` with the `wasm32-unknown-unknown` target, and `rust/target` in `.gitignore`. Verify: `cargo metadata --manifest-path rust/Cargo.toml` succeeds.
 - [x] 1.5 Change the path dependencies to the crates.io versions (`morphir-extension-sdk` 0.4.0, `morphir-core` 0.2.0, `morphir-workspace` 0.2.0), copy the VFS types from `morphir-common` into `src/vfs.rs`, and drop `morphir-common`. If a build needs an unpublished change, ask finos/morphir-rust to publish it instead of adding a git dependency. Verify: `cargo build` and `cargo build --target wasm32-unknown-unknown` succeed in `rust/`.
 - [x] 1.6 Add `.config/mise/config.rust.toml` (Rust, `wasm-tools`) and the tasks `rust:fmt`, `rust:lint`, `rust:test` and `rust:wasm`. Verify: `MISE_ENV=rust mise run rust:test` passes all imported tests locally, and plain `mise install` still installs no Rust.
-- [ ] 1.7 Add `.github/workflows/gleam-extension.yml` with the path filters and the `fmt`, `test` and `wasm` jobs from design.html CI-1. Verify: the PR shows these jobs green and the four required checks unchanged.
+- [x] 1.7 Add `.github/workflows/gleam-extension.yml` with the path filters and the `fmt`, `test` and `wasm` jobs from design.html CI-1. Verify: the PR shows these jobs green and the four required checks unchanged.
 - [x] 1.8 Move the Renovate rule for the `gleam-core` revision into `renovate.json`. Verify: `npx --yes --package renovate -- renovate-config-validator` passes.
 - [x] 1.9 Add a "Rust half" section to `AGENTS.md` and `README.md` (layout, mise environment, commands) and an `Added` entry in `CHANGELOG.md`. Verify: the documented commands run as written.
-- [ ] 1.10 Open PR 1. When EasyCLA, CI and review pass, merge it with a merge commit, not a squash (Damian approved this merge). Verify: `git log --first-parent main` shows one merge commit and `git log main -- rust/crates/morphir-gleam-binding` shows the imported commits.
+- [x] 1.10 Open PR 1. When EasyCLA, CI and review pass, merge it with a merge commit, not a squash (Damian approved this merge). Verify: `git log --first-parent main` shows one merge commit and `git log main -- rust/crates/morphir-gleam-binding` shows the imported commits.
 
 ## 2. Core-Wasm guest and MEP 0.2 model operations (PR 2)
 
