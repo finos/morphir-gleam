@@ -17,7 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- None
+- The Gleam extension `0.4.0` builds as a core-Wasm guest for the execution
+  profile `morphir/mep-bytes-v1/v1-draft` instead of an Extism plugin. It adds
+  the MEP `0.2.0-draft.1` model operations for `morphir-ir` / `morphir-json` /
+  IR `4.0.0`, host tests on the built module, and a committed claims check (#23).
 
 ### Deprecated
 

@@ -20,16 +20,16 @@ against `main`, in order.
 
 ## 2. Core-Wasm guest and MEP 0.2 model operations (PR 2)
 
-- [ ] 2.1 Check whether the SDK JSON-RPC dispatcher can run without `extism-pdk`; record the result in the PR. Verify: a build with `--no-default-features --features core-wasm` compiles or the blocker is named.
-- [ ] 2.2 Write the Wasmtime host test harness first: it loads a module, provides only `morphir_bytes_v1`, applies the profile limits, and runs a describe/initialize/operation/shutdown/exit session. Verify: it fails against the current build because `handle` has the Extism ABI.
-- [ ] 2.3 Add the `core_wasm` module and features `core-wasm` and `extism` (design.html RUN-2). Verify: the host test passes describe and exit; `wasm-tools print` shows only the three `morphir_bytes_v1` imports; the guest-ABI scenarios in `specs/gleam-extension-guest/spec.md` pass.
-- [ ] 2.4 Implement `Frontend::compile_model` and `Backend::generate_model` and advertise the JSON tuple (design.html MEP-1). Verify: host tests for valid module, syntax error, generate from compiled IR, unsupported construct, and the `ion-binary` refusal pass.
-- [ ] 2.5 Check that MEP `0.1` results are unchanged. Verify: the imported integration tests pass without edits to expected output.
-- [ ] 2.6 Replace the Extism parity test `tests/wasm.rs` with a native-versus-core-Wasm parity test on the fixtures. Verify: it passes in CI.
-- [ ] 2.7 Add `claims/expected.json` and the claims check task `rust:claims`. Verify: changing a capability without updating the file makes CI fail.
-- [ ] 2.8 Add the host test for the largest real-world fixture with time and memory output. Verify: it finishes under 10 s and 256 MiB in CI, and the numbers are in the PR.
-- [ ] 2.9 Set the crate version to `0.4.0`; document the guest contract in the crate README and add a `Changed` entry in `CHANGELOG.md`. Verify: describe reports `0.4.0`.
-- [ ] 2.10 Add a host test that compiles a document tree: several Gleam modules with relative paths that import one another, in one compileModel request. Verify: the IR has every module and cross-module references resolve; this is the guest half of the document-tree fast follower.
+- [x] 2.1 Check whether the SDK JSON-RPC dispatcher can run without `extism-pdk`; record the result in the PR. Verify: a build with `--no-default-features --features core-wasm` compiles or the blocker is named.
+- [x] 2.2 Write the Wasmtime host test harness first: it loads a module, provides only `morphir_bytes_v1`, applies the profile limits, and runs a describe/initialize/operation/shutdown/exit session. Verify: it fails against the current build because `handle` has the Extism ABI.
+- [x] 2.3 Add the `guest` and `core_wasm` modules and remove the Extism export (design.html RUN-2). Verify: the host test passes describe and exit; `wasm-tools print` shows only the three `morphir_bytes_v1` imports; the guest-ABI scenarios in `specs/gleam-extension-guest/spec.md` pass.
+- [x] 2.4 Implement `Frontend::compile_model` and `Backend::generate_model` and advertise the JSON tuple (design.html MEP-1). Verify: host tests for valid module, syntax error, generate from compiled IR, unsupported construct, and the `ion-binary` refusal pass.
+- [x] 2.5 Check that MEP `0.1` results are unchanged. Verify: the imported integration tests pass without edits to expected output.
+- [x] 2.6 Replace the Extism parity test `tests/wasm.rs` with a native-versus-core-Wasm parity test on the fixtures. Verify: it passes in CI.
+- [x] 2.7 Add `claims/expected.json` and the claims check task `rust:claims`. Verify: changing a capability without updating the file makes CI fail.
+- [x] 2.8 Add the host test for the largest real-world fixture with time and memory output. Verify: it finishes under 10 s and 256 MiB in CI, and the numbers are in the PR.
+- [x] 2.9 Set the crate version to `0.4.0`; document the guest contract in the crate README and add a `Changed` entry in `CHANGELOG.md`. Verify: describe reports `0.4.0`.
+- [x] 2.10 Add a host test that compiles a document tree: several Gleam modules with relative paths that import one another, in one compileModel request. Verify: the IR has every module and cross-module references resolve; this is the guest half of the document-tree fast follower.
 
 ## 3. Release workflow and attestations (PR 3)
 

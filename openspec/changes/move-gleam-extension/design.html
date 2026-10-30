@@ -201,24 +201,29 @@ sunset, and <code>extension/gleam/v0.3.0</code> stays available in
 finos/morphir-rust for it.</p>
 
 <h3 id="run-2">RUN-2. Byte-channel adapter in this repository</h3>
-<p>Add a module <code>core_wasm</code> to the crate behind a Cargo feature
-<code>core-wasm</code>. It exports <code>handle</code>: it reads
-<code>input_len()</code> bytes with <code>input_byte</code>, passes the JSON-RPC body
-to the same SDK dispatcher that the Extism <code>handle</code> uses, writes the
-response with <code>output_byte</code>, and returns the length, <code>0</code> or
-<code>-2</code> as the profile defines. The Extism export moves behind a feature
-<code>extism</code> that release builds do not enable, so the module has no
-<code>extism:host/env</code> imports. A CI step checks the import list with
-<code>wasm-tools print</code>.</p>
+<p>The crate has two small modules. <code>guest</code> serves one exchange on every
+target, so native unit tests cover it: it parses the body, answers notifications
+itself (<code>-2</code>, or <code>0</code> for <code>morphir.exit</code>), and passes
+requests to the SDK's session and dispatcher (<code>__ProtocolSession</code>,
+<code>__dispatch_request</code> and the role dispatchers). These are the same
+functions that the SDK's Extism macro uses; they do not need
+<code>extism-pdk</code>. <code>core_wasm</code> (wasm32 only) exports
+<code>handle</code>, reads <code>input_len()</code> bytes with
+<code>input_byte</code>, and writes the response with <code>output_byte</code>.</p>
+<p>Implementation result: the Extism export is removed, not kept behind a
+feature. Nothing in this repository hosts an Extism plugin, and
+<code>0.3.0</code> stays available in finos/morphir-rust. The one Extism call that
+remained, a <code>host_info!</code> log in <code>generate</code>, is removed. The
+host test checks that the module imports exactly the three
+<code>morphir_bytes_v1</code> functions. The linker sets the memory maximum to 4096
+pages (<code>rust/.cargo/config.toml</code>), because the profile requires a finite
+maximum.</p>
 <p>Alternative: add the adapter to <code>morphir-extension-sdk</code> first. That is the
 better final home, because every Rust guest needs it, but it is a change to
 finos/morphir-rust. The adapter is about 100 lines. Keep it here now and move it
 to the SDK as follow-up.</p>
-<p class="unsure">Not sure: whether the SDK's JSON-RPC dispatcher can be called
-without <code>extism-pdk</code>. If it cannot, the adapter calls the
-<code>Extension</code>, <code>Frontend</code> and <code>Backend</code> methods
-through a small local dispatcher instead. I will check this first in the
-implementation (task 2.1).</p>
+<p class="meta">Task 2.1 answered the earlier open point: the SDK dispatcher runs
+without <code>extism-pdk</code>.</p>
 
 <h3 id="mep-1">MEP-1. Claim the JSON model tuple first</h3>
 <p>The MoonBit host runs only MEP <code>0.2.0-draft.1</code> sessions on the
@@ -331,6 +336,9 @@ changed dependency versions.</p>
 dependencies <code>morphir-json</code> 0.2.0 and <code>morphir-config</code> 0.0.1.
 On 2026-10-30 no crate had a commit on finos/morphir-rust <code>main</code> after its
 publish time, so the published versions equal the source the crate builds with today.</li>
+<li>Model envelope identity: <code>modelId</code> is the package name and
+<code>revision</code> is <code>sha256:&lt;payload digest&gt;</code>. No shared convention
+exists yet; the MoonBit design may set one.</li>
 <li><code>morphir-common</code> is not published and is native-only. The crate uses
 only its VFS (<code>MemoryVfs</code>, <code>OsVfs</code>, <code>Vfs</code>). Copy that
 small part into <code>src/vfs.rs</code> and drop the dependency.</li>
@@ -364,7 +372,7 @@ finos/morphir-rust. An index records both by owner/repo.</p>
 <tbody>
 <tr><td>Unit and integration</td><td>Imported tests: unit tests, 17 integration targets, cucumber features, goldens, fixtures. Run with <code>cargo test</code> on the host target.</td><td>PR CI (Linux), release</td></tr>
 <tr><td>Wasm build</td><td><code>cargo build --release --target wasm32-unknown-unknown --features core-wasm</code>, <code>wasm-tools validate</code>, import list check</td><td>PR CI, release</td></tr>
-<tr><td>Core-Wasm host test</td><td>A test binary that loads the built <code>.wasm</code> with Wasmtime, provides only <code>morphir_bytes_v1</code>, applies the profile limits, and runs describe, initialize, compileModel, generateModel, shutdown and exit on fixtures. It replaces the Extism parity test <code>tests/wasm.rs</code>.</td><td>PR CI (Linux), release (Linux, macOS, Windows)</td></tr>
+<tr><td>Core-Wasm host test</td><td><code>tests/core_wasm.rs</code> loads the built <code>.wasm</code> with Wasmtime, provides only <code>morphir_bytes_v1</code>, checks imports and the memory maximum, applies the 10&nbsp;s call limit, and runs MoonBit-style sessions (describe, initialize with one tuple, <code>morphir.initialized</code>, compileModel or generateModel, shutdown, exit) next to the earlier parity tests. It replaces the Extism test <code>tests/wasm.rs</code>. It builds in a <code>guest-test</code> profile (release without LTO).</td><td>PR CI (Linux), release (Linux, macOS, Windows)</td></tr>
 <tr><td>Claims check</td><td>Describe answer from the host test equals <code>claims/expected.json</code></td><td>PR CI, release</td></tr>
 <tr><td>Real Gleam compile</td><td>Opt-in test with <code>MORPHIR_TEST_GLEAM</code>: generated source compiles with the pinned Gleam</td><td>PR CI (this repository already pins Gleam)</td></tr>
 </tbody>
@@ -428,9 +436,12 @@ merged, so that the 0.4.0 module can be run by the MoonBit CLI soon after its re
 one document and fixes <code>languageId: "moonbit"</code>. A Gleam project is a tree of
 modules under <code>src/</code> that import one another, and the guest already accepts
 several documents in one compile request (<code>multi_document</code>). The host must
-send the whole source tree as documents with relative paths and the language id from
-the claims, and must respect the request size limits for it. The guest side of this
-is tested in this change (multi-module fixtures in the host test).</li>
+send the whole source tree as documents with the language id from the claims, and
+must respect the request size limits for it. The SDK admits several documents only
+with relative paths, or with absolute URIs under <code>sources.root</code>; it refuses
+several absolute URIs without a root. The guest side is tested in this change: a
+three-module tree with imports across directories, and all 13 real-world fixtures in
+one request.</li>
 <li>Read <code>runtime: "core-wasm"</code> descriptors and install core-Wasm bundles
 from a repository (install accepts only native executables today).</li>
 <li>Add a host test that runs the released Gleam module; rework bead

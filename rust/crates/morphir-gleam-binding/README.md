@@ -1,15 +1,16 @@
-# Native Gleam extension
+# Morphir Gleam extension
 
 The Gleam extension compiles types to Morphir IR v3 and v4, generates Gleam,
 and supports incremental compilation through the Morphir Extension Protocol.
-Its extension identifier is `morphir-gleam`. The Rust crate and WASM artifact
-remain `morphir-gleam-binding`.
+Its extension identifier is `morphir-gleam`. The Rust crate is
+`morphir-gleam-binding`.
 
 This crate moved from finos/morphir-rust (`crates/morphir-gleam-binding`) to
 finos/morphir-gleam (`rust/crates/morphir-gleam-binding`) with its history. Each
 imported commit names its original commit in an `Imported-from:` trailer. The
-move is planned in the OpenSpec change `move-gleam-extension`. That change also
-replaces the Extism module with a core-Wasm guest for the MoonBit Morphir CLI.
+move is planned in the OpenSpec change `move-gleam-extension`. Since `0.4.0`
+the WASM build is a core-Wasm guest for the MoonBit Morphir CLI, not an Extism
+plugin (see [Core-Wasm guest](#core-wasm-guest)).
 
 The Rust Morphir CLI in finos/morphir links this crate as a native provider.
 That CLI is being sunset. The same implementation supports MEP invocation and a
@@ -113,6 +114,37 @@ warning. The per-module baseline payload is wrapped v4 module IR, including for
 a v3 distribution, and is private to this extension's versioned cache context.
 Changes to the parser or value-lowering semantics invalidate older baselines.
 
+## Core-Wasm guest
+
+The `wasm32-unknown-unknown` build is one core WebAssembly module for the
+execution profile `morphir/mep-bytes-v1/v1-draft`, the MoonBit CLI's
+`core-wasm-process` route.
+
+- **Imports:** only `morphir_bytes_v1.input_len`, `input_byte` and
+  `output_byte`. The module cannot read files, the environment, the clock or
+  random numbers.
+- **Exports:** `handle` and one unshared memory with a maximum of 4096 pages
+  (256 MiB), set in `rust/.cargo/config.toml`.
+- **`handle` result:** the exact response length; `0` after `morphir.exit`; `-2`
+  after another notification. A body that is not UTF-8 JSON gets a JSON-RPC parse
+  error response.
+- **Protocol:** MEP `0.2.0-draft.1` with the model tuple `morphir-ir` /
+  `morphir-json` / envelope `0.1.0-draft.1` / IR `4.0.0` for
+  `morphir.frontend.compileModel` and `morphir.backend.generateModel`. MEP `0.1`
+  (`morphir.frontend.compile`, `morphir.backend.generate`) stays available. Ion
+  `morphir-model` is not supported yet; an Ion-only offer gets an empty
+  agreement.
+- **Model envelope:** the payload is the IR v4 document that
+  `morphir.frontend.compile` returns. `modelId` is the package name and
+  `revision` is `sha256:<payload digest>`.
+- **Document trees:** several documents need relative paths, or absolute URIs
+  under `sources.root`. Several absolute URIs without a root are refused.
+
+`src/guest.rs` serves one exchange and has native unit tests. `src/core_wasm.rs`
+only moves bytes across the imports. The claims that `morphir.extension.describe`
+returns are committed in `claims/expected.json`; a release copies them into
+`release.json`.
+
 ## Verification and packaging
 
 From the repository root, with the Rust tools of the `rust` mise environment:
@@ -122,8 +154,15 @@ MISE_ENV=rust mise install
 MISE_ENV=rust mise run rust:fmt     # add --fix to format
 MISE_ENV=rust mise run rust:lint
 MISE_ENV=rust mise run rust:test
-MISE_ENV=rust mise run rust:wasm    # build, validate and compare guest with native
+MISE_ENV=rust mise run rust:claims  # add --update after a capability change
+MISE_ENV=rust mise run rust:wasm    # build, validate and run the host tests
 ```
+
+`rust:wasm` builds the release module and runs `tests/core_wasm.rs` on it. That
+test is a host for the execution profile: it gives the module only the byte
+channel, checks the imports and the memory limit, applies the 10-second call
+limit, and compares guest results with native results. Set `MORPHIR_GLEAM_GUEST`
+to test another module, for example a downloaded release.
 
 `ring`, a dependency of `gleam-core`, compiles C for `wasm32-unknown-unknown`.
 Apple clang cannot do this. On macOS, install LLVM (`brew install llvm`); the
