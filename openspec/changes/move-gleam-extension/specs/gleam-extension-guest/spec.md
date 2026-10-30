@@ -80,6 +80,14 @@ documents in the request and SHALL return a model envelope that holds Morphir IR
 - **WHEN** the host sends a compile request with a valid Gleam module that declares a custom type and a function
 - **THEN** the response envelope holds IR that contains that type and that value
 
+#### Scenario: Document tree
+- **WHEN** the host sends several Gleam modules that import one another, with relative paths or with absolute URIs under `sources.root`
+- **THEN** the response envelope holds IR for every module and the imported types resolve
+
+#### Scenario: Several absolute documents without a root
+- **WHEN** the host sends several documents with absolute URIs and no `sources.root`
+- **THEN** the guest refuses the request with an invalid-params error
+
 #### Scenario: Gleam syntax error
 - **WHEN** the host sends a compile request with a Gleam module that does not parse
 - **THEN** the response has a diagnostic with the document and the source range of the error
@@ -112,4 +120,8 @@ from the host. All source text SHALL come in the request.
 
 #### Scenario: Request that names a file path only
 - **WHEN** a compile request names a document path but does not include its text
-- **THEN** the guest returns a diagnostic that the document text is missing
+- **THEN** the guest returns a JSON-RPC invalid-params error and reads no file
+
+#### Scenario: Module has no ambient imports
+- **WHEN** a tool lists the imports of the released `.wasm` file
+- **THEN** it finds no import for files, environment, clocks or random numbers

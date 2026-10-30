@@ -28,3 +28,9 @@ codegen-units = 1
 [profile.dev]
 opt-level = 0
 debug = true
+
+# Host tests of the built guest: optimized Wasmtime without the cost of LTO.
+[profile.guest-test]
+inherits = "release"
+lto = false
+codegen-units = 16

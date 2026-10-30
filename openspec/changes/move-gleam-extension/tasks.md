@@ -13,23 +13,23 @@ against `main`, in order.
 - [x] 1.4 Add `rust/Cargo.toml` (workspace), `rust/rust-toolchain.toml` with the `wasm32-unknown-unknown` target, and `rust/target` in `.gitignore`. Verify: `cargo metadata --manifest-path rust/Cargo.toml` succeeds.
 - [x] 1.5 Change the path dependencies to the crates.io versions (`morphir-extension-sdk` 0.4.0, `morphir-core` 0.2.0, `morphir-workspace` 0.2.0), copy the VFS types from `morphir-common` into `src/vfs.rs`, and drop `morphir-common`. If a build needs an unpublished change, ask finos/morphir-rust to publish it instead of adding a git dependency. Verify: `cargo build` and `cargo build --target wasm32-unknown-unknown` succeed in `rust/`.
 - [x] 1.6 Add `.config/mise/config.rust.toml` (Rust, `wasm-tools`) and the tasks `rust:fmt`, `rust:lint`, `rust:test` and `rust:wasm`. Verify: `MISE_ENV=rust mise run rust:test` passes all imported tests locally, and plain `mise install` still installs no Rust.
-- [ ] 1.7 Add `.github/workflows/gleam-extension.yml` with the path filters and the `fmt`, `test` and `wasm` jobs from design.html CI-1. Verify: the PR shows these jobs green and the four required checks unchanged.
+- [x] 1.7 Add `.github/workflows/gleam-extension.yml` with the path filters and the `fmt`, `test` and `wasm` jobs from design.html CI-1. Verify: the PR shows these jobs green and the four required checks unchanged.
 - [x] 1.8 Move the Renovate rule for the `gleam-core` revision into `renovate.json`. Verify: `npx --yes --package renovate -- renovate-config-validator` passes.
 - [x] 1.9 Add a "Rust half" section to `AGENTS.md` and `README.md` (layout, mise environment, commands) and an `Added` entry in `CHANGELOG.md`. Verify: the documented commands run as written.
-- [ ] 1.10 Open PR 1. When EasyCLA, CI and review pass, merge it with a merge commit, not a squash (Damian approved this merge). Verify: `git log --first-parent main` shows one merge commit and `git log main -- rust/crates/morphir-gleam-binding` shows the imported commits.
+- [x] 1.10 Open PR 1. When EasyCLA, CI and review pass, merge it with a merge commit, not a squash (Damian approved this merge). Verify: `git log --first-parent main` shows one merge commit and `git log main -- rust/crates/morphir-gleam-binding` shows the imported commits.
 
 ## 2. Core-Wasm guest and MEP 0.2 model operations (PR 2)
 
-- [ ] 2.1 Check whether the SDK JSON-RPC dispatcher can run without `extism-pdk`; record the result in the PR. Verify: a build with `--no-default-features --features core-wasm` compiles or the blocker is named.
-- [ ] 2.2 Write the Wasmtime host test harness first: it loads a module, provides only `morphir_bytes_v1`, applies the profile limits, and runs a describe/initialize/operation/shutdown/exit session. Verify: it fails against the current build because `handle` has the Extism ABI.
-- [ ] 2.3 Add the `core_wasm` module and features `core-wasm` and `extism` (design.html RUN-2). Verify: the host test passes describe and exit; `wasm-tools print` shows only the three `morphir_bytes_v1` imports; the guest-ABI scenarios in `specs/gleam-extension-guest/spec.md` pass.
-- [ ] 2.4 Implement `Frontend::compile_model` and `Backend::generate_model` and advertise the JSON tuple (design.html MEP-1). Verify: host tests for valid module, syntax error, generate from compiled IR, unsupported construct, and the `ion-binary` refusal pass.
-- [ ] 2.5 Check that MEP `0.1` results are unchanged. Verify: the imported integration tests pass without edits to expected output.
-- [ ] 2.6 Replace the Extism parity test `tests/wasm.rs` with a native-versus-core-Wasm parity test on the fixtures. Verify: it passes in CI.
-- [ ] 2.7 Add `claims/expected.json` and the claims check task `rust:claims`. Verify: changing a capability without updating the file makes CI fail.
-- [ ] 2.8 Add the host test for the largest real-world fixture with time and memory output. Verify: it finishes under 10 s and 256 MiB in CI, and the numbers are in the PR.
-- [ ] 2.9 Set the crate version to `0.4.0`; document the guest contract in the crate README and add a `Changed` entry in `CHANGELOG.md`. Verify: describe reports `0.4.0`.
-- [ ] 2.10 Add a host test that compiles a document tree: several Gleam modules with relative paths that import one another, in one compileModel request. Verify: the IR has every module and cross-module references resolve; this is the guest half of the document-tree fast follower.
+- [x] 2.1 Check whether the SDK JSON-RPC dispatcher can run without `extism-pdk`; record the result in the PR. Verify: a build with `--no-default-features --features core-wasm` compiles or the blocker is named.
+- [x] 2.2 Write the Wasmtime host test harness first: it loads a module, provides only `morphir_bytes_v1`, applies the profile limits, and runs a describe/initialize/operation/shutdown/exit session. Verify: it fails against the current build because `handle` has the Extism ABI.
+- [x] 2.3 Add the `guest` and `core_wasm` modules and remove the Extism export (design.html RUN-2). Verify: the host test passes describe and exit; `wasm-tools print` shows only the three `morphir_bytes_v1` imports; the guest-ABI scenarios in `specs/gleam-extension-guest/spec.md` pass.
+- [x] 2.4 Implement `Frontend::compile_model` and `Backend::generate_model` and advertise the JSON tuple (design.html MEP-1). Verify: host tests for valid module, syntax error, generate from compiled IR, unsupported construct, and the `ion-binary` refusal pass.
+- [x] 2.5 Check that MEP `0.1` results are unchanged. Verify: the imported integration tests pass without edits to expected output.
+- [x] 2.6 Replace the Extism parity test `tests/wasm.rs` with a native-versus-core-Wasm parity test on the fixtures. Verify: it passes in CI.
+- [x] 2.7 Add `claims/expected.json` and the claims check task `rust:claims`. Verify: changing a capability without updating the file makes CI fail.
+- [x] 2.8 Add the host test for the largest real-world fixture with time and memory output. Verify: it finishes under 10 s and 256 MiB in CI, and the numbers are in the PR.
+- [x] 2.9 Set the crate version to `0.4.0`; document the guest contract in the crate README and add a `Changed` entry in `CHANGELOG.md`. Verify: describe reports `0.4.0`.
+- [x] 2.10 Add a host test that compiles a document tree: several Gleam modules with relative paths that import one another, in one compileModel request. Verify: the IR has every module and cross-module references resolve; this is the guest half of the document-tree fast follower.
 
 ## 3. Release workflow and attestations (PR 3)
 

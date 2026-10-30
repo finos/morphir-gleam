@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Run clippy on the Rust workspace with warnings as errors"
+#MISE description="Run clippy on the Rust workspace (host and wasm32) with warnings as errors"
 . "$(dirname "$0")/_env.sh"
 cargo clippy --locked --all-targets --all-features -- -D warnings
+cargo clippy --locked --target wasm32-unknown-unknown -p morphir-gleam-binding -- -D warnings

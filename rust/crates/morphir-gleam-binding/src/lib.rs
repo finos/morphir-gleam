@@ -11,8 +11,12 @@ use std::collections::HashSet;
 use url::Url;
 
 pub mod backend;
+#[cfg(target_arch = "wasm32")]
+mod core_wasm;
 pub mod frontend;
+pub mod guest;
 mod incremental;
+pub mod model_transport;
 pub mod roundtrip;
 mod version;
 pub mod vfs;
@@ -45,7 +49,7 @@ impl Extension for GleamExtension {
             ],
             author: Some("FINOS".into()),
             license: Some("Apache-2.0".into()),
-            homepage: Some("https://github.com/finos/morphir-rust".into()),
+            homepage: Some("https://github.com/finos/morphir-gleam".into()),
             min_sdk_version: Some("0.1.0".into()),
         }
     }
@@ -73,6 +77,7 @@ impl Extension for GleamExtension {
                 discover: true,
             }),
             incremental: true,
+            model_transport: Some(model_transport::support()),
             ..Default::default()
         }
     }
@@ -81,6 +86,13 @@ impl Extension for GleamExtension {
 impl Frontend for GleamExtension {
     fn compile(&self, request: CompileRequest) -> Result<CompileResult> {
         frontend::compile::compile(request)
+    }
+
+    fn compile_model(
+        &self,
+        request: morphir_extension_sdk::model::CompileModelRequest,
+    ) -> Result<morphir_extension_sdk::model::CompileModelResult> {
+        model_transport::compile_model(request)
     }
 
     fn supported_languages() -> Vec<String> {
@@ -538,8 +550,6 @@ impl Backend for GleamExtension {
                 )],
             });
         }
-        host_info!("Generating Gleam code from IR");
-
         match backend::generate_gleam(&request.ir, &request.options) {
             Ok(artifacts) => Ok(GenerateResult {
                 success: true,
@@ -560,13 +570,17 @@ impl Backend for GleamExtension {
         }
     }
 
+    fn generate_model(
+        &self,
+        request: morphir_extension_sdk::model::GenerateModelRequest,
+    ) -> Result<GenerateResult> {
+        model_transport::generate_model(request)
+    }
+
     fn target_languages() -> Vec<String> {
         vec!["gleam".into()]
     }
 }
-
-// Export the extension
-morphir_extension_sdk::export_extension!(GleamExtension, frontend, backend, workspace);
 
 #[cfg(test)]
 mod tests {
