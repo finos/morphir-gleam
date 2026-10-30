@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="Build the Gleam extension Wasm module, validate it and run the guest parity tests"
+. "$(dirname "$0")/_env.sh"
+cargo build --locked --release --target wasm32-unknown-unknown -p morphir-gleam-binding
+wasm=target/wasm32-unknown-unknown/release/morphir_gleam_binding.wasm
+wasm-tools validate "$wasm"
+echo "validated $wasm ($(wc -c <"$wasm" | tr -d ' ') bytes)"
+MORPHIR_GLEAM_GUEST="$PWD/$wasm" cargo test --locked --release --features wasm-host-tests --test wasm -- --include-ignored

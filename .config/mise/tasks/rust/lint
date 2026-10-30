@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#MISE description="Run clippy on the Rust workspace with warnings as errors"
+. "$(dirname "$0")/_env.sh"
+cargo clippy --locked --all-targets --all-features -- -D warnings

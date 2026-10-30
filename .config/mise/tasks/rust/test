@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#MISE description="Run the Rust unit, integration and acceptance tests"
+. "$(dirname "$0")/_env.sh"
+cargo test --locked

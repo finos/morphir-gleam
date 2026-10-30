@@ -1,0 +1,5 @@
+# Rust half of the repository (rust/). Use with MISE_ENV=rust so that the Gleam
+# jobs do not install Rust. rust/rust-toolchain.toml selects the same channel.
+[tools]
+rust = "1.98.1"
+wasm-tools = "1.262.0"
