@@ -80,10 +80,6 @@ jobs:
           install_args: rust wasm-tools
           cache: true
 
-      - name: Install the wasm32 target
-        working-directory: rust
-        run: rustup target add wasm32-unknown-unknown
-
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
         with:
