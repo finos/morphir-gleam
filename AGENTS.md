@@ -59,7 +59,10 @@ MISE_ENV=rust mise run rust:wasm
 ```
 
 - `.github/workflows/gleam-extension.yml` runs these checks when `rust/` or its
-  tooling changes.
+  tooling changes, and assembles a dry-run bundle.
+- `.github/workflows/gleam-extension-release.yml` publishes the attested bundle
+  for a tag `extension/gleam/v<version>` on `main`. Tag a release only with
+  maintainer approval. `release.yml` ignores `extension/*` releases.
 - Morphir Rust crates come from crates.io. If the extension needs an unpublished
   change, have finos/morphir-rust publish it; do not add a git dependency.
 - `gleam-core` is a git dependency pinned to a commit. Renovate updates it once

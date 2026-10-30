@@ -33,12 +33,12 @@ against `main`, in order.
 
 ## 3. Release workflow and attestations (PR 3)
 
-- [ ] 3.1 Add the bun mise task `rust:bundle` that writes `release.json`, the `.sha256` files and runs `sha256sum --check` (design.html MGR-1, REL-1). Verify: a test of the task checks the file set and descriptor fields from `specs/gleam-extension-release/spec.md`.
-- [ ] 3.2 Add `bundle-dry-run` to `gleam-extension.yml`. Verify: the PR job uploads a bundle with the expected four files.
-- [ ] 3.3 Add `.github/workflows/gleam-extension-release.yml` with the check, build, test and publish jobs and the minimum permissions from design.html REL-1. Verify: `actionlint` passes; a `workflow_dispatch` run with `publish: false` on the branch passes check, build and test and creates nothing.
-- [ ] 3.4 Make the check job fail on a version mismatch and on a tag that is not on `main`. Verify: a dispatch run with a mismatched version fails in check.
-- [ ] 3.5 Guard `.github/workflows/release.yml` against `extension/*` releases. Verify: `actionlint` passes and the condition is visible in the job.
-- [ ] 3.6 Document the release steps, the bundle files and the `gh attestation verify` command in the crate README, and add an entry in `CHANGELOG.md`. Verify: the verify command is correct for the workflow path.
+- [x] 3.1 Add the bun mise task `rust:bundle` that writes `release.json`, the `.sha256` files and runs `sha256sum --check` (design.html MGR-1, REL-1). Verify: a test of the task checks the file set and descriptor fields from `specs/gleam-extension-release/spec.md`.
+- [x] 3.2 Add `bundle-dry-run` to `gleam-extension.yml`. Verify: the PR job uploads a bundle with the expected four files.
+- [x] 3.3 Add `.github/workflows/gleam-extension-release.yml` with the check, build, test and publish jobs and the minimum permissions from design.html REL-1. Verify: `actionlint` passes. A manual run needs the workflow on `main`, so the dry run with `publish: false` moves to 4.1.
+- [ ] 3.4 Make the check job fail on a version mismatch and on a tag that is not on `main`. Verify after merge: a manual run with a tag whose version differs from the crate fails in check.
+- [x] 3.5 Guard `.github/workflows/release.yml` against `extension/*` releases. Verify: `actionlint` passes and the condition is visible in the job.
+- [x] 3.6 Document the release steps, the bundle files and the `gh attestation verify` command in the crate README, and add an entry in `CHANGELOG.md`. Verify: the verify command is correct for the workflow path.
 
 ## 4. Integration check
 

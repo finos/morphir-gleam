@@ -168,9 +168,42 @@ to test another module, for example a downloaded release.
 Apple clang cannot do this. On macOS, install LLVM (`brew install llvm`); the
 tasks use it automatically. Linux clang works as it is.
 
-The bundle release workflow of this repository is added by the
-`move-gleam-extension` change. Until then, `extension/gleam/v0.3.0` in
-finos/morphir-rust is the latest released bundle.
+## Release
+
+A tag `extension/gleam/v<version>` on `main` starts
+`.github/workflows/gleam-extension-release.yml`. The tag version must equal the
+crate version. The workflow:
+
+1. checks the tag, the version and that the commit is on `main`;
+2. builds the module once on Linux;
+3. runs the host tests on that module on Linux, macOS and Windows, and the
+   native suite on Linux;
+4. assembles the bundle from the tested module with `rust:bundle`, attests the
+   module and `release.json` with `actions/attest@v4`, verifies the attestations,
+   and creates the GitHub release with `--latest=false`.
+
+A release has exactly these assets:
+
+| Asset | Content |
+|---|---|
+| `morphir-gleam-<version>.wasm` | the core-Wasm guest |
+| `morphir-gleam-<version>.release.json` | descriptor `2.0.0-draft.2`, one artifact with `runtime: "core-wasm"`, the execution profile, and the claims from a live describe |
+| `<asset>.sha256` | one `sha256sum` line for each of the two files |
+
+Verify downloaded assets with:
+
+```sh
+sha256sum --check ./*.sha256
+gh attestation verify morphir-gleam-<version>.wasm --repo finos/morphir-gleam \
+  --signer-workflow finos/morphir-gleam/.github/workflows/gleam-extension-release.yml
+```
+
+A manual run of the workflow without a tag, or with `publish` off, is a dry run:
+it builds, tests and assembles the bundle, and attests and publishes nothing.
+Pull requests that touch the Rust half also assemble a dry-run bundle. To build
+one locally after `rust:wasm`, run `mise run rust:bundle`.
+
+`extension/gleam/v0.3.0` in finos/morphir-rust is the last Extism release.
 
 When Gleam is installed, verify generated records, aliases and sum types with:
 

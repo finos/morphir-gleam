@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Morphir Gleam extension `morphir-gleam` (crate `morphir-gleam-binding`)
   under `rust/`, imported from finos/morphir-rust with its history, with Rust
   mise tasks and a change-scoped CI workflow (#23).
+- Release workflow for the Gleam extension: tags `extension/gleam/v<version>`
+  build the core-Wasm guest once, test it on Linux, macOS and Windows, and
+  publish an attested bundle (`release.json` `2.0.0-draft.2` and `.sha256`
+  files) with `--latest=false`. Pull requests assemble a dry-run bundle (#23).
 
 ### Changed
 
