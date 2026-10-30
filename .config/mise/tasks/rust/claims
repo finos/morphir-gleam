@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#MISE description="Check the guest claims against claims/expected.json (pass --update to rewrite the file)"
+. "$(dirname "$0")/_env.sh"
+if [ "${1:-}" = "--update" ]; then
+    export MORPHIR_UPDATE_CLAIMS=1
+fi
+cargo test --locked -p morphir-gleam-binding --test claims

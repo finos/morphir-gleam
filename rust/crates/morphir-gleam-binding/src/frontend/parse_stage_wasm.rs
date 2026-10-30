@@ -44,10 +44,11 @@ pub(crate) fn emit_parse_stage(
         };
     }
     let module_count = modules.len();
-    let _ = modules
-        .iter()
-        .map(|module| (module.module_name, module.uri, module.module))
-        .count();
+    // Read the fields that native emission uses, so wasm32 builds have no
+    // dead-code warnings for them.
+    for module in modules {
+        let _ = (module.module_name, module.uri, module.module);
+    }
     EmitParseStageOutcome::RolledBack {
         failure: EmitFailure {
             message: format!(

@@ -1,0 +1,4 @@
+# The core-Wasm execution profile morphir/mep-bytes-v1/v1-draft requires one
+# unshared memory with a finite maximum of at most 4096 pages (256 MiB).
+[target.wasm32-unknown-unknown]
+rustflags = ["-C", "link-arg=--max-memory=268435456"]

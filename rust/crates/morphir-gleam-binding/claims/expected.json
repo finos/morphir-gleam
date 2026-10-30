@@ -1,0 +1,87 @@
+{
+  "claimsVersion": "0.1.0-draft.2",
+  "protocolVersions": [
+    "0.2.0-draft.1",
+    "0.1"
+  ],
+  "extension": {
+    "id": "morphir-gleam",
+    "name": "Morphir Gleam",
+    "version": "0.4.0",
+    "description": "Gleam language support for Morphir",
+    "types": [
+      "frontend",
+      "backend",
+      "workspace"
+    ],
+    "author": "FINOS",
+    "homepage": "https://github.com/finos/morphir-gleam",
+    "license": "Apache-2.0",
+    "min_sdk_version": "0.1.0"
+  },
+  "capabilities": {
+    "frontend": {
+      "languages": [
+        {
+          "id": "gleam",
+          "fileExtensions": [
+            ".gleam"
+          ]
+        }
+      ],
+      "irVersions": [
+        "3",
+        "4"
+      ],
+      "compile": true,
+      "incremental": true,
+      "fragments": false,
+      "multiDocument": true
+    },
+    "backend": {
+      "targets": [
+        "gleam"
+      ],
+      "irVersions": [
+        "3",
+        "4"
+      ],
+      "generate": true
+    },
+    "workspace": {
+      "protocolVersions": [
+        "0.1.0-draft.1"
+      ],
+      "discover": true
+    },
+    "modelTransport": {
+      "tuples": [
+        {
+          "operation": "morphir.frontend.compileModel",
+          "profile": "morphir-ir",
+          "codec": "morphir-json",
+          "envelopeVersion": "0.1.0-draft.1",
+          "irVersion": "4.0.0"
+        },
+        {
+          "operation": "morphir.backend.generateModel",
+          "profile": "morphir-ir",
+          "codec": "morphir-json",
+          "envelopeVersion": "0.1.0-draft.1",
+          "irVersion": "4.0.0"
+        }
+      ],
+      "limits": {
+        "maxEncodedBytes": 67108864,
+        "maxDecodedBytes": 50331648,
+        "maxDepth": 1024,
+        "maxNodes": 16777216
+      },
+      "guarantees": []
+    },
+    "streaming": false,
+    "incremental": true,
+    "cancellation": false,
+    "progress": false
+  }
+}
