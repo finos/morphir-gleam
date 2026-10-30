@@ -75,14 +75,28 @@ impl Guest {
             Some(value) => value,
             None => return error(Value::Null, PARSE_ERROR, "Request is not UTF-8 JSON"),
         };
+        // Only a JSON-RPC 2.0 object with a method is a request or a
+        // notification. Anything else gets an error, and never closes the session.
+        let is_message = value.get("jsonrpc").and_then(Value::as_str) == Some("2.0")
+            && value.get("method").is_some_and(Value::is_string);
+        if !is_message {
+            return error(
+                readable_id(&value),
+                INVALID_REQUEST,
+                "Invalid JSON-RPC request",
+            );
+        }
         if value.get("id").is_none() {
             return self.notification(&value);
         }
         let request: ExtensionRequest = match serde_json::from_value(value.clone()) {
             Ok(request) => request,
             Err(_) => {
-                let id = value.get("id").cloned().unwrap_or(Value::Null);
-                return error(id, INVALID_REQUEST, "Invalid JSON-RPC request");
+                return error(
+                    readable_id(&value),
+                    INVALID_REQUEST,
+                    "Invalid JSON-RPC request",
+                );
             }
         };
         respond(&self.dispatch(&request))
@@ -108,6 +122,14 @@ impl Guest {
         self.session.dispatch(request, || {
             __dispatch_request::<GleamExtension>(request, &dispatchers, &TYPES)
         })
+    }
+}
+
+/// The request id when it is a string or a number, otherwise `null`.
+fn readable_id(value: &Value) -> Value {
+    match value.get("id") {
+        Some(id @ (Value::String(_) | Value::Number(_))) => id.clone(),
+        _ => Value::Null,
     }
 }
 
@@ -176,6 +198,30 @@ mod tests {
         let answer = body(guest.exchange(br#"{"jsonrpc":"2.0","id":7}"#));
         assert_eq!(answer["id"], 7);
         assert_eq!(answer["error"]["code"], INVALID_REQUEST);
+    }
+
+    #[test]
+    fn json_that_is_not_a_request_gets_an_invalid_request_response() {
+        let guest = Guest::new();
+        for input in [
+            &b"{}"[..],
+            b"null",
+            b"42",
+            b"[]",
+            br#"{"jsonrpc":"2.0"}"#,
+            br#"{"jsonrpc":"1.0","method":"morphir.initialized"}"#,
+            br#"{"method":"morphir.exit"}"#,
+        ] {
+            let exchange = guest.exchange(input);
+            assert!(exchange.code() > 0, "{}", String::from_utf8_lossy(input));
+            let answer = body(exchange);
+            assert_eq!(answer["id"], Value::Null);
+            assert_eq!(answer["error"]["code"], INVALID_REQUEST);
+        }
+        // None of these closed the session.
+        let params = json!({"protocolVersions": ["0.1"]});
+        let answer = request(&guest, 1, methods::DESCRIBE, params);
+        assert!(answer.get("error").is_none(), "{answer}");
     }
 
     #[test]
