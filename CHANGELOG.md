@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Shared OpenSpec html-design extension, locked templates, core agent skills,
   contributor tasks, and CI validation.
+- The Morphir Gleam extension `morphir-gleam` (crate `morphir-gleam-binding`)
+  under `rust/`, imported from finos/morphir-rust with its history, with Rust
+  mise tasks and a change-scoped CI workflow (#23).
 
 ### Changed
 

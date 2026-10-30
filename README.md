@@ -15,6 +15,21 @@ Morphir is a library of tools that work to capture business logic as data. This 
 | [morphir_models](./packages/morphir_models) | Gleam port of the Morphir IR (Intermediate Representation) |
 | [morphir_cli](./packages/morphir_cli) | CLI tooling for working with Morphir IR |
 
+## Gleam extension (Rust)
+
+`rust/` holds the Morphir Gleam extension `morphir-gleam`. It compiles Gleam
+source to Morphir IR and generates Gleam from Morphir IR. It uses the parser of
+the Gleam compiler, so it is written in Rust. It moved here from
+finos/morphir-rust with its history. See
+[the crate README](./rust/crates/morphir-gleam-binding/README.md) and the
+OpenSpec change `move-gleam-extension`.
+
+```sh
+MISE_ENV=rust mise install
+MISE_ENV=rust mise run rust:test
+MISE_ENV=rust mise run rust:wasm
+```
+
 ## Installation
 
 ### Quick Install (Recommended)
@@ -188,6 +203,8 @@ morphir-gleam/
 │       │       ├── about.gleam
 │       │       └── version.gleam
 │       └── test/
+├── rust/                   # Gleam extension (Cargo workspace)
+│   └── crates/morphir-gleam-binding/
 └── README.md
 ```
 

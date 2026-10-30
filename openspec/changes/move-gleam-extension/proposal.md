@@ -56,8 +56,8 @@ None. This repository has no specs yet.
 
 ## Tracking
 
-- No GitHub issue exists for this work. After approval, open one issue in
-  finos/morphir-gleam for this change and link it here.
+- Tracking issue: [finos/morphir-gleam#23](https://github.com/finos/morphir-gleam/issues/23).
+  Damian approved this proposal on 2026-10-30.
 - Source plan: bead `morphir-ukvn.1.4` (A3) in finos/morphir. It depends on
   `morphir-ukvn.1.3` (A2, common layout) and its open child `morphir-ukvn.1.3.3`
   (template and release workflow). This change does not wait for A2. It follows
