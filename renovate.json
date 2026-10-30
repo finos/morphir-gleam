@@ -2,5 +2,23 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "packageRules": [
+    {
+      "description": "gleam-core is a git dependency pinned to a commit. Its digest updates track the Gleam compiler and need changes in morphir-gleam-binding, so they get their own PR, once a month.",
+      "matchManagers": [
+        "cargo"
+      ],
+      "matchPackageNames": [
+        "gleam-core"
+      ],
+      "matchUpdateTypes": [
+        "digest"
+      ],
+      "groupName": "gleam-core",
+      "schedule": [
+        "* 0-5 1 * *"
+      ]
+    }
   ]
 }

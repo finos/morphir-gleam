@@ -31,6 +31,7 @@ This makes porting the Morphir IR from Elm to Gleam relatively straightforward w
 
 ```
 morphir-gleam/
+├── rust/                        # Gleam extension (Rust, Cargo workspace)
 ├── packages/                    # Monorepo packages directory
 │   └── morphir_models/          # Core IR types package
 │       ├── gleam.toml           # Package manifest
@@ -41,6 +42,29 @@ morphir-gleam/
 │   └── tasks/                   # File-based mise tasks
 └── AGENTS.md                    # This file
 ```
+
+### Rust half (Gleam extension)
+
+`rust/` is a Cargo workspace. It holds `crates/morphir-gleam-binding`, the
+Morphir Gleam extension (id `morphir-gleam`). It uses Rust because it depends on
+the parser of the Gleam compiler (`gleam-core`). Rust tools are in
+`.config/mise/config.rust.toml`; select them with `MISE_ENV=rust`, so the Gleam
+jobs do not install Rust.
+
+```sh
+MISE_ENV=rust mise run rust:fmt     # --fix to format
+MISE_ENV=rust mise run rust:lint
+MISE_ENV=rust mise run rust:test
+MISE_ENV=rust mise run rust:wasm
+```
+
+- `.github/workflows/gleam-extension.yml` runs these checks when `rust/` or its
+  tooling changes.
+- Morphir Rust crates come from crates.io. If the extension needs an unpublished
+  change, have finos/morphir-rust publish it; do not add a git dependency.
+- `gleam-core` is a git dependency pinned to a commit. Renovate updates it once
+  a month.
+- On macOS the Wasm build needs Homebrew LLVM (`brew install llvm`).
 
 ### Adding New Packages
 

@@ -1,0 +1,99 @@
+name: Gleam extension
+
+# Checks for the Rust half (rust/), which holds the morphir-gleam extension.
+# It runs only when the Rust half or its tooling changes. The Gleam package
+# checks in ci.yml stay the required checks for every pull request.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "rust/**"
+      - ".config/mise/config.rust.toml"
+      - ".config/mise/tasks/rust/**"
+      - ".github/workflows/gleam-extension.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "rust/**"
+      - ".config/mise/config.rust.toml"
+      - ".config/mise/tasks/rust/**"
+      - ".github/workflows/gleam-extension.yml"
+  workflow_dispatch:
+
+# Superseded pull request runs are cancelled. Runs on main always finish,
+# because only they save the Rust dependency cache.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  # Select .config/mise/config.rust.toml and install only the Rust tools.
+  MISE_ENV: rust
+  MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+jobs:
+  rust:
+    name: Rust checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install mise
+        uses: jdx/mise-action@v3
+        with:
+          install_args: rust wasm-tools
+          cache: true
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+          shared-key: native
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Format check
+        run: mise run rust:fmt
+
+      - name: Clippy
+        run: mise run rust:lint
+
+      - name: Unit, integration and acceptance tests
+        run: mise run rust:test
+
+  wasm:
+    name: Wasm guest
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install mise
+        uses: jdx/mise-action@v3
+        with:
+          install_args: rust wasm-tools
+          cache: true
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+          shared-key: wasm
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build, validate and test the guest
+        run: mise run rust:wasm
+
+      - name: Upload the guest module
+        uses: actions/upload-artifact@v6
+        with:
+          name: morphir-gleam-wasm
+          path: rust/target/wasm32-unknown-unknown/release/morphir_gleam_binding.wasm
+          if-no-files-found: error
+          retention-days: 7
