@@ -20,6 +20,9 @@ jobs:
   # Run CI checks first
   ci-checks:
     name: CI Checks
+    # Extension releases (extension/<id>/v*) have their own workflow; do not
+    # build or upload CLI binaries for them.
+    if: ${{ !startsWith(github.event.release.tag_name || github.ref_name, 'extension/') && !startsWith(inputs.version, 'extension/') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

@@ -1,0 +1,228 @@
+name: Gleam extension release
+
+# Publishes the morphir-gleam extension bundle for tag extension/gleam/v<version>.
+# The module is built once, tested on three systems, and only those tested
+# bytes are bundled, attested and attached to the GitHub release.
+#
+# A manual run without a tag, or with publish=false, is a dry run: it builds,
+# tests and assembles the bundle but attests and publishes nothing.
+on:
+  push:
+    tags:
+      - "extension/gleam/v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to release, e.g. extension/gleam/v0.4.0 (empty: dry run of this ref)"
+        required: false
+        type: string
+      publish:
+        description: "Attest and publish the release (needs a tag on main)"
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  MISE_ENV: rust
+  MISE_TASK_RUN_AUTO_INSTALL: "false"
+  WASM: rust/target/wasm32-unknown-unknown/release/morphir_gleam_binding.wasm
+
+jobs:
+  check:
+    name: Check the release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      version: ${{ steps.release.outputs.version }}
+      sha: ${{ steps.release.outputs.sha }}
+      publish: ${{ steps.release.outputs.publish }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - name: Resolve tag, version and commit
+        id: release
+        env:
+          EVENT: ${{ github.event_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_PUBLISH: ${{ inputs.publish }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" = "push" ]; then
+            tag="$GITHUB_REF_NAME"; publish=true
+          else
+            tag="$INPUT_TAG"; publish="$INPUT_PUBLISH"
+          fi
+          crate=$(sed -n 's/^version = "\(.*\)"$/\1/p' rust/crates/morphir-gleam-binding/Cargo.toml | head -n 1)
+          sha=$(git rev-parse HEAD)
+          if [ -n "$tag" ]; then
+            case "$tag" in
+              extension/gleam/v*) version="${tag#extension/gleam/v}" ;;
+              *) echo "::error::$tag is not an extension/gleam/v<version> tag"; exit 1 ;;
+            esac
+            [ "$(git rev-parse "refs/tags/$tag^{commit}")" = "$sha" ] || { echo "::error::checkout is not $tag"; exit 1; }
+            if [ "$version" != "$crate" ]; then
+              echo "::error::tag version $version differs from crate version $crate"; exit 1
+            fi
+            if ! git merge-base --is-ancestor "$sha" origin/main; then
+              echo "::error::$tag ($sha) is not on main"; exit 1
+            fi
+          else
+            [ "$publish" = "true" ] && { echo "::error::publishing needs a tag"; exit 1; }
+            version="$crate"
+          fi
+          {
+            echo "tag=$tag"; echo "version=$version"; echo "sha=$sha"; echo "publish=$publish"
+          } >> "$GITHUB_OUTPUT"
+          echo "release ${tag:-(dry run)} version $version commit $sha publish $publish"
+
+  build:
+    name: Build the guest
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.check.outputs.sha }}
+
+      - name: Install mise
+        uses: jdx/mise-action@v3
+        with:
+          install_args: rust wasm-tools
+
+      - name: Build and validate the module
+        working-directory: rust
+        run: |
+          cargo build --locked --release --target wasm32-unknown-unknown -p morphir-gleam-binding
+          wasm-tools validate "../$WASM"
+          sha256sum "../$WASM"
+
+      - name: Upload the module
+        uses: actions/upload-artifact@v6
+        with:
+          name: guest-wasm
+          path: ${{ env.WASM }}
+          if-no-files-found: error
+          retention-days: 7
+
+  test:
+    name: Test the guest (${{ matrix.os }})
+    needs: [check, build]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.check.outputs.sha }}
+
+      - name: Install mise
+        uses: jdx/mise-action@v3
+        with:
+          install_args: rust
+
+      - name: Download the module
+        uses: actions/download-artifact@v7
+        with:
+          name: guest-wasm
+          path: guest
+
+      - name: Host tests on the built module
+        shell: bash
+        working-directory: rust
+        run: |
+          MORPHIR_GLEAM_GUEST="$GITHUB_WORKSPACE/guest/morphir_gleam_binding.wasm" \
+            cargo test --locked --profile guest-test --features guest-host-tests \
+            --test core_wasm -- --include-ignored --show-output
+
+      - name: Unit, integration and acceptance tests
+        if: runner.os == 'Linux'
+        working-directory: rust
+        run: cargo test --locked
+
+  bundle:
+    name: Bundle, attest and publish
+    needs: [check, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    env:
+      TAG: ${{ needs.check.outputs.tag }}
+      VERSION: ${{ needs.check.outputs.version }}
+      SHA: ${{ needs.check.outputs.sha }}
+      PUBLISH: ${{ needs.check.outputs.publish }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.check.outputs.sha }}
+
+      - name: Install mise
+        uses: jdx/mise-action@v3
+        with:
+          install_args: bun
+
+      - name: Download the tested module
+        uses: actions/download-artifact@v7
+        with:
+          name: guest-wasm
+          path: guest
+
+      - name: Assemble the bundle
+        run: |
+          bun .config/mise/tasks/rust/bundle --wasm guest/morphir_gleam_binding.wasm \
+            --out dist --git-commit "$SHA"
+          (cd dist && sha256sum --check ./*.sha256)
+
+      - name: Upload the bundle
+        uses: actions/upload-artifact@v6
+        with:
+          name: morphir-gleam-bundle-${{ needs.check.outputs.version }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Attest the module and the descriptor
+        if: env.PUBLISH == 'true'
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            dist/morphir-gleam-${{ needs.check.outputs.version }}.wasm
+            dist/morphir-gleam-${{ needs.check.outputs.version }}.release.json
+
+      - name: Verify the attestations
+        if: env.PUBLISH == 'true'
+        run: |
+          for file in "dist/morphir-gleam-$VERSION.wasm" "dist/morphir-gleam-$VERSION.release.json"; do
+            gh attestation verify "$file" --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/gleam-extension-release.yml"
+          done
+
+      - name: Create the GitHub release
+        if: env.PUBLISH == 'true'
+        run: |
+          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --verify-tag --latest=false \
+            --title "morphir-gleam extension $VERSION" \
+            --notes "Morphir Gleam extension \`morphir-gleam\` $VERSION: a core-Wasm guest for the execution profile \`morphir/mep-bytes-v1/v1-draft\`. Verify an asset with \`gh attestation verify <file> --repo $GITHUB_REPOSITORY --signer-workflow $GITHUB_REPOSITORY/.github/workflows/gleam-extension-release.yml\`."
