@@ -1,0 +1,7 @@
+# The Gleam extension tests compare sources, goldens and claims byte for byte.
+# Keep them LF on every system, including Windows checkouts with autocrlf.
+rust/crates/morphir-gleam-binding/tests/** text eol=lf
+rust/crates/morphir-gleam-binding/claims/*.json text eol=lf
+
+# Generated-source goldens preserve the backend's final blank line.
+rust/crates/morphir-gleam-binding/tests/goldens/*.gleam text eol=lf whitespace=-blank-at-eof

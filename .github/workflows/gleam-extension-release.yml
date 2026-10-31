@@ -125,10 +125,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
-      fail-fast: true
+      # Report every system; the bundle job still needs all of them to pass.
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+    env:
+      # gleam-core's repository has paths longer than the Windows limit.
+      # Cargo's built-in git cannot check them out; the git CLI can, with
+      # core.longpaths on.
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
     steps:
+      - name: Allow long paths in git checkouts
+        if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
+
       - name: Checkout code
         uses: actions/checkout@v6
         with:
