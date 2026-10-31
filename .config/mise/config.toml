@@ -5,7 +5,7 @@ bun = "latest"
 
 # OpenSpec uses the same portable html-design bundle as related Morphir repos.
 node = "24.14.1"
-"npm:@fission-ai/openspec" = "1.14.3"
+"npm:@fission-ai/openspec" = "1.16.0"
 
 # The shared snapshot checker is a standalone MoonBit development tool.
 [tools."http:moonbit"]
