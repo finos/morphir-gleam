@@ -67,8 +67,12 @@ IR `4.0.0` for both `morphir.frontend.compileModel` and
 - **WHEN** the host offers MEP `0.2.0-draft.1` and the JSON tuple in `initialize`
 - **THEN** the guest returns that tuple as the agreed tuple
 
+#### Scenario: Host default not supported
+- **WHEN** the host offers every model format it supports, with `morphir-model` / `ion-binary` first as its default, and also the JSON tuple
+- **THEN** the guest agrees on the JSON tuple and the operation runs, without an error
+
 #### Scenario: Tuple not supported
-- **WHEN** the host offers only profile `morphir-model` with codec `ion-binary`
+- **WHEN** the host offers only profile `morphir-model` with codec `ion-binary`, because that format is required
 - **THEN** the guest returns an empty agreement and the host reports `extension.tuple_unavailable`
 
 ### Requirement: Compile returns a Morphir IR envelope
