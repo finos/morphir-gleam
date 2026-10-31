@@ -754,3 +754,39 @@ fn guest_refuses_several_absolute_documents_without_a_root() {
     );
     close(guest);
 }
+
+#[test]
+#[ignore = "requires a built Gleam WASM guest"]
+fn guest_compiles_a_relative_document_tree_without_a_root() {
+    // The shape the MoonBit CLI sends: paths relative to the source base and
+    // no sources.root. Nested modules keep their full path.
+    let mut request = request("4");
+    request.sources.documents = [
+        ("shared/numbers.gleam", "pub type Number = Int\n"),
+        ("app/numbers.gleam", "pub type Count = Int\n"),
+        (
+            "app/orders.gleam",
+            "import shared/numbers\npub type Order { Order(quantity: numbers.Number) }\n",
+        ),
+    ]
+    .into_iter()
+    .map(|(path, text)| SourceDocument {
+        uri: path.into(),
+        language_id: "gleam".into(),
+        version: 1,
+        text: text.into(),
+    })
+    .collect();
+    let mut params = compile_model_request(&request);
+    params.sources.root = None;
+    let mut guest = model_session(ModelOperation::CompileModel);
+    let compiled = result(
+        &mut guest,
+        ExtensionRequest::new(methods::COMPILE_MODEL, params, 3).unwrap(),
+    );
+    close(guest);
+    assert_eq!(compiled["success"], true, "{compiled:#}");
+    let mut modules: Vec<String> = serde_json::from_value(compiled["modules"].clone()).unwrap();
+    modules.sort();
+    assert_eq!(modules, ["app/numbers", "app/orders", "shared/numbers"]);
+}

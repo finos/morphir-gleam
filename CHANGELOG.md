@@ -36,7 +36,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- None
+- The Gleam extension keeps the full path of a relative document URI as its
+  module name, so `app/numbers.gleam` and `shared/numbers.gleam` no longer
+  collide when a host sends a source tree without `sources.root` (#23).
 
 ### Security
 
