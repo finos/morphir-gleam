@@ -10,14 +10,18 @@ on:
       - "rust/**"
       - ".config/mise/config.rust.toml"
       - ".config/mise/tasks/rust/**"
+      - ".github/scripts/gleam-extension/**"
       - ".github/workflows/gleam-extension.yml"
+      - ".github/workflows/gleam-extension-release.yml"
   pull_request:
     branches: [main]
     paths:
       - "rust/**"
       - ".config/mise/config.rust.toml"
       - ".config/mise/tasks/rust/**"
+      - ".github/scripts/gleam-extension/**"
       - ".github/workflows/gleam-extension.yml"
+      - ".github/workflows/gleam-extension-release.yml"
   workflow_dispatch:
 
 # Superseded pull request runs are cancelled. Runs on main always finish,
@@ -95,5 +99,45 @@ jobs:
         with:
           name: morphir-gleam-wasm
           path: rust/target/wasm32-unknown-unknown/release/morphir_gleam_binding.wasm
+          if-no-files-found: error
+          retention-days: 7
+
+  bundle-dry-run:
+    name: Bundle dry run
+    needs: wasm
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install mise
+        uses: jdx/mise-action@v3
+        with:
+          install_args: bun
+          cache: true
+
+      - name: Download the guest module
+        uses: actions/download-artifact@v7
+        with:
+          name: morphir-gleam-wasm
+          path: guest
+
+      - name: Test the bundle script
+        working-directory: .github/scripts/gleam-extension
+        run: bun test
+
+      - name: Assemble the bundle without attesting or publishing
+        run: |
+          bun .config/mise/tasks/rust/bundle --wasm guest/morphir_gleam_binding.wasm \
+            --out dist --git-commit "$GITHUB_SHA"
+          (cd dist && sha256sum --check ./*.sha256)
+          ls -l dist
+
+      - name: Upload the bundle
+        uses: actions/upload-artifact@v6
+        with:
+          name: morphir-gleam-bundle-dry-run
+          path: dist/*
           if-no-files-found: error
           retention-days: 7
