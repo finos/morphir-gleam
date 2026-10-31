@@ -1,5 +1,5 @@
 [tools]
-gleam = "1.14.0"
+gleam = "1.19.2"
 erlang = "27"
 bun = "latest"
 
