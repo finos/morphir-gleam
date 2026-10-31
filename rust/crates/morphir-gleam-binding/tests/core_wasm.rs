@@ -790,3 +790,53 @@ fn guest_compiles_a_relative_document_tree_without_a_root() {
     modules.sort();
     assert_eq!(modules, ["app/numbers", "app/orders", "shared/numbers"]);
 }
+
+#[test]
+#[ignore = "requires a built Gleam WASM guest"]
+fn guest_negotiates_json_when_the_host_prefers_ion_but_offers_both() {
+    // The host lists every format it supports, its default first. A guest
+    // without the default agrees on another offered format; this is not an error.
+    let ion_default = morphir_extension_sdk::model::ModelTransportTuple {
+        profile: "morphir-model".into(),
+        codec: morphir_extension_sdk::model::ModelCodec::IonBinary,
+        ..tuple(ModelOperation::CompileModel)
+    };
+    let mut offer = moonbit_offer(ModelOperation::CompileModel);
+    offer.tuples.insert(0, ion_default);
+    let mut guest = guest();
+    let initialized = result(
+        &mut guest,
+        ExtensionRequest::new(
+            methods::INITIALIZE,
+            InitializeParams {
+                model_transport: Some(offer),
+                protocol_versions: vec![MODEL_MEP.into()],
+                host: PeerInfo {
+                    kind: Default::default(),
+                    name: "gleam-core-wasm-test".into(),
+                    version: "0.1.0".into(),
+                },
+            },
+            2,
+        )
+        .unwrap(),
+    );
+    assert_eq!(initialized["protocolVersion"], MODEL_MEP);
+    assert_eq!(
+        initialized["capabilities"]["modelTransport"]["tuples"],
+        json!([tuple(ModelOperation::CompileModel)])
+    );
+    let (code, _) = guest.exchange(br#"{"jsonrpc":"2.0","method":"morphir.initialized"}"#);
+    assert_eq!(code, -2);
+    let compiled = result(
+        &mut guest,
+        ExtensionRequest::new(
+            methods::COMPILE_MODEL,
+            compile_model_request(&request("4")),
+            3,
+        )
+        .unwrap(),
+    );
+    assert_eq!(compiled["success"], true, "{compiled:#}");
+    close(guest);
+}
