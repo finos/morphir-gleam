@@ -36,7 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- None
+- The Gleam extension release workflow checks out `gleam-core` on Windows,
+  whose repository has paths longer than the Windows limit (#23).
 
 ### Security
 
