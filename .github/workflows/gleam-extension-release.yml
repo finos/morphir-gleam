@@ -100,7 +100,7 @@ jobs:
           ref: ${{ needs.check.outputs.sha }}
 
       - name: Install mise
-        uses: jdx/mise-action@v3
+        uses: jdx/mise-action@v5
         with:
           install_args: rust wasm-tools
 
@@ -145,7 +145,7 @@ jobs:
           ref: ${{ needs.check.outputs.sha }}
 
       - name: Install mise
-        uses: jdx/mise-action@v3
+        uses: jdx/mise-action@v5
         with:
           install_args: rust
 
@@ -190,7 +190,7 @@ jobs:
           ref: ${{ needs.check.outputs.sha }}
 
       - name: Install mise
-        uses: jdx/mise-action@v3
+        uses: jdx/mise-action@v5
         with:
           install_args: bun
 
