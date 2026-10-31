@@ -290,7 +290,9 @@ fn module_name_from_document_uri(
 ) -> std::result::Result<(ModuleName, String), String> {
     let path = parsed_path(uri)?;
     // An explicit source root is authoritative. Without one, preserve the path
-    // following the conventional `src` directory, or fall back to the basename.
+    // following the conventional `src` directory, keep a relative path whole
+    // (MEP document paths are relative to the source base), or fall back to the
+    // basename of an absolute path.
     let relative = if let Some(root) = source_root {
         if !path.has_same_root_identity(root) {
             return Err(format!(
@@ -303,6 +305,8 @@ fn module_name_from_document_uri(
             .to_vec()
     } else if let Some(src_index) = path.segments.iter().rposition(|segment| segment == "src") {
         path.segments[src_index + 1..].to_vec()
+    } else if matches!(path.origin, PathOrigin::Path) && !uri.starts_with(['/', '\\']) {
+        path.segments.clone()
     } else {
         path.segments.last().cloned().into_iter().collect()
     };
@@ -1295,6 +1299,32 @@ mod tests {
         assert_eq!(
             distribution.def.modules.keys().cloned().collect::<Vec<_>>(),
             result.modules
+        );
+    }
+
+    #[test]
+    fn relative_document_paths_keep_their_nesting() {
+        let (mut request, _output_dir) = compile_request("file:///unused.gleam", "", IR_VERSION);
+        request.sources.documents = vec![
+            document("shared/numbers.gleam", "pub type Number = Int\n"),
+            document("app/numbers.gleam", "pub type Count = Int\n"),
+            document(
+                "app/orders.gleam",
+                "import shared/numbers\npub type Order { Order(quantity: numbers.Number) }\n",
+            ),
+            document("src/util/text.gleam", "pub type Text = String\n"),
+        ];
+
+        let result = GleamExtension
+            .compile(request)
+            .expect("compile relative document tree");
+
+        assert!(result.success, "{:?}", result.diagnostics);
+        let mut modules = result.modules.clone();
+        modules.sort();
+        assert_eq!(
+            modules,
+            ["app/numbers", "app/orders", "shared/numbers", "util/text"]
         );
     }
 
