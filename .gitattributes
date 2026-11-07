@@ -5,3 +5,6 @@ rust/crates/morphir-gleam-binding/claims/*.json text eol=lf
 
 # Generated-source goldens preserve the backend's final blank line.
 rust/crates/morphir-gleam-binding/tests/goldens/*.gleam text eol=lf whitespace=-blank-at-eof
+
+# mission-control-tools compares the managed OpenSpec files byte for byte.
+openspec/schemas/html-design/** text eol=lf

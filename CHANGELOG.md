@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The OpenSpec tasks use the pinned `mission-control-tools` 0.1.0 binary
+  instead of the bundled `scripts/openspec-ext.mbtx` script. The extension lock
+  is format 2. CI runs `mission-control-tools openspec check --bundle`.
 - The shared OpenSpec checker uses MoonBit 0.10.18 and the openspec-ext snapshot
   from moonrockz/mission-control#24, whose scripts put their imports in
   frontmatter. The unavailable macOS x64 download is no longer listed.
@@ -35,7 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- None
+- The MoonBit toolchain, `scripts/openspec-ext.mbtx`, its Gherkin feature, the
+  `openspec:test` task and the CI step that completed the MoonBit SDK. After the
+  switch to `mission-control-tools`, nothing in the repository runs MoonBit.
 
 ### Fixed
 
