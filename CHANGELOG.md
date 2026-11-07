@@ -46,6 +46,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Gleam extension keeps the full path of a relative document URI as its
   module name, so `app/numbers.gleam` and `shared/numbers.gleam` no longer
   collide when a host sends a source tree without `sources.root` (#23).
+- The Gleam backend writes the IR type of each parameter and the output type of
+  each value, for example `pub fn ready() -> Bool`. Before, it wrote no
+  annotations, so an IR `4.0.0` round trip compiled the generated source with
+  output type `Unit` and changed the model (#34).
 
 ### Security
 

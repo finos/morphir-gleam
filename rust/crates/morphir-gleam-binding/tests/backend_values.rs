@@ -48,7 +48,34 @@ fn cons(head: Value, tail: Value) -> Value {
         Box::new(tail),
     )
 }
+fn sdk_type(module: &str, name: &str, arguments: Vec<Type>) -> Type {
+    Type::Reference(
+        Default::default(),
+        FQName::new(
+            morphir_core::naming::Path::new("morphir/SDK"),
+            morphir_core::naming::Path::new(module),
+            Name::from(name),
+        ),
+        arguments,
+    )
+}
+fn int_type() -> Type {
+    sdk_type("basics", "int", vec![])
+}
+fn list_type(element: Type) -> Type {
+    sdk_type("list", "list", vec![element])
+}
+fn tuple_type(elements: Vec<Type>) -> Type {
+    Type::Tuple(Default::default(), elements)
+}
+
 fn generate_body(body: ValueBody) -> GenerateResult {
+    generate_typed_body(body, Type::Unit(Default::default()))
+}
+
+/// The generator writes the declared result type, so a fixture whose
+/// generated module the Gleam compiler checks must declare its real type.
+fn generate_typed_body(body: ValueBody, output_type: Type) -> GenerateResult {
     let package = PackageDefinition {
         modules: IndexMap::from([(
             "main".into(),
@@ -65,7 +92,7 @@ fn generate_body(body: ValueBody) -> GenerateResult {
                                 None,
                                 ValueDefinition {
                                     input_types: IndexMap::new(),
-                                    output_type: Some(Type::Unit(Default::default())),
+                                    output_type: Some(output_type),
                                     body,
                                 },
                             ),
@@ -83,8 +110,8 @@ fn generate_body(body: ValueBody) -> GenerateResult {
         })
         .unwrap()
 }
-fn generated(value: Value) -> String {
-    let result = generate_body(ValueBody::Expression(value));
+fn generated(value: Value, output_type: Type) -> String {
+    let result = generate_typed_body(ValueBody::Expression(value), output_type);
     assert!(result.success, "{:?}", result.diagnostics);
     assert_eq!(result.artifacts.len(), 1);
     let code = result.artifacts[0].content.clone();
@@ -130,7 +157,10 @@ fn nested_local_values() -> Value {
 #[test]
 fn local_value_definitions_remain_expressions_when_nested() {
     assert_eq!(
-        generated(nested_local_values()),
+        generated(
+            nested_local_values(),
+            tuple_type(vec![int_type(), int_type()])
+        ),
         include_str!("goldens/nested_local_values.gleam")
     );
 }
@@ -163,10 +193,20 @@ fn representative() -> Value {
         ],
     )
 }
+fn representative_type() -> Type {
+    tuple_type(vec![
+        int_type(),
+        list_type(int_type()),
+        int_type(),
+        list_type(int_type()),
+        list_type(int_type()),
+        int_type(),
+    ])
+}
 #[test]
 fn structural_values_match_the_complete_golden_and_parse() {
     assert_eq!(
-        generated(representative()),
+        generated(representative(), representative_type()),
         include_str!("goldens/structural_values.gleam")
     );
 }
@@ -265,17 +305,20 @@ fn structural_values_pass_the_gleam_compiler() {
     .unwrap();
     std::fs::write(
         project.path().join("src/main.gleam"),
-        generated(representative()),
+        generated(representative(), representative_type()),
     )
     .unwrap();
     std::fs::write(
         project.path().join("src/refutable.gleam"),
-        generated(refutable_destructure()),
+        generated(refutable_destructure(), int_type()),
     )
     .unwrap();
     std::fs::write(
         project.path().join("src/nested_local_values.gleam"),
-        generated(nested_local_values()),
+        generated(
+            nested_local_values(),
+            tuple_type(vec![int_type(), int_type()]),
+        ),
     )
     .unwrap();
     let output = std::process::Command::new(
@@ -340,7 +383,7 @@ fn refutable_destructure() -> Value {
 #[test]
 fn refutable_destructure_preserves_the_pattern_assertion() {
     assert_eq!(
-        generated(refutable_destructure()),
+        generated(refutable_destructure(), int_type()),
         include_str!("goldens/list_destructure.gleam")
     );
 }
