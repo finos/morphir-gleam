@@ -95,7 +95,7 @@ jobs:
         run: mise run rust:wasm
 
       - name: Upload the guest module
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: morphir-gleam-wasm
           path: rust/target/wasm32-unknown-unknown/release/morphir_gleam_binding.wasm
@@ -118,7 +118,7 @@ jobs:
           cache: true
 
       - name: Download the guest module
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: morphir-gleam-wasm
           path: guest
@@ -135,7 +135,7 @@ jobs:
           ls -l dist
 
       - name: Upload the bundle
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: morphir-gleam-bundle-dry-run
           path: dist/*
