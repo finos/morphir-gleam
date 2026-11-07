@@ -277,7 +277,10 @@ fn generated_functions_keep_readable_parameter_and_value_names() {
     assert!(result.success, "{:?}", result.diagnostics);
     let code = &result.artifacts[0].content;
     assert!(code.contains("/// Keep the value."), "{code}");
-    assert!(code.contains("pub fn keep_value(raw_value)"), "{code}");
+    assert!(
+        code.contains("pub fn keep_value(raw_value: Int) -> Int {"),
+        "{code}"
+    );
     assert!(code.contains("\n  raw_value\n"), "{code}");
     parse_gleam("main.gleam", code).expect("generated function parses");
 }

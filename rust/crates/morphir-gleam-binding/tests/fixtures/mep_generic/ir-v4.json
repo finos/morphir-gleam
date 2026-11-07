@@ -1,0 +1,46 @@
+{
+  "formatVersion": 4,
+  "distribution": {
+    "Library": {
+      "packageName": "mck/generic",
+      "dependencies": {},
+      "def": {
+        "modules": {
+          "main": {
+            "Public": {
+              "types": {},
+              "values": {
+                "blocked": {
+                  "Public": {
+                    "ExpressionBody": {
+                      "inputTypes": {},
+                      "outputType": "morphir/SDK:basics#bool",
+                      "body": {
+                        "Literal": {
+                          "BoolLiteral": false
+                        }
+                      }
+                    }
+                  }
+                },
+                "ready": {
+                  "Public": {
+                    "ExpressionBody": {
+                      "inputTypes": {},
+                      "outputType": "morphir/SDK:basics#bool",
+                      "body": {
+                        "Literal": {
+                          "BoolLiteral": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

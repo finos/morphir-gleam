@@ -105,6 +105,10 @@ the agreed tuple and SHALL return Gleam source artifacts, one per module.
 - **WHEN** the host sends a generate request with the envelope from a successful compile
 - **THEN** the response has one `.gleam` artifact for each module in the IR
 
+#### Scenario: Generated source keeps value signatures
+- **WHEN** the host generates Gleam from IR `4.0.0` or `3.0.0` and compiles the generated source again with the same IR version
+- **THEN** each value has the same input types and output type as in the first IR
+
 #### Scenario: Unsupported IR construct
 - **WHEN** the IR has a construct that the backend cannot generate
 - **THEN** the response has an error diagnostic that names the construct
