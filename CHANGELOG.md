@@ -21,9 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- The OpenSpec tasks use the pinned `mission-control-tools` 0.1.0 binary
+- The OpenSpec tasks use the pinned `mission-control-tools` 0.1.1 binary
   instead of the bundled `scripts/openspec-ext.mbtx` script. The extension lock
   is format 2. CI runs `mission-control-tools openspec check --bundle`.
+  Version 0.1.1 accepts the pinned OpenSpec 1.16.1, thus
+  `mise run openspec:setup` works again. The core agent skills are regenerated
+  with OpenSpec 1.16.1.
 - The shared OpenSpec checker uses MoonBit 0.10.18 and the openspec-ext snapshot
   from moonrockz/mission-control#24, whose scripts put their imports in
   frontmatter. The unavailable macOS x64 download is no longer listed.

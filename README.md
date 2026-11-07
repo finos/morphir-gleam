@@ -137,7 +137,7 @@ CSS and SVG. The committed schema and ownership lock work without a sibling chec
 or an unpublished package dependency. Keep project policy in `openspec/config.yaml`.
 
 `mise install` installs the pinned OpenSpec, Node.js and the pinned
-[`mission-control-tools`](https://github.com/moonrockz/mission-control/tree/tools-v0.1.0/apps/tools)
+[`mission-control-tools`](https://github.com/moonrockz/mission-control/tree/tools-v0.1.1/apps/tools)
 release binary. The binary installs and checks the managed bundle. No other toolchain is necessary.
 
 ```sh
