@@ -316,6 +316,25 @@ impl<V: Vfs> MorphirToGleamVisitor<V> {
         value_name: &str,
         value_def: &AccessControlledValueDefinition,
     ) -> Result<()> {
+        // Write the body first, so an unsupported body reports its own
+        // diagnostic before an unsupported signature type does, and the
+        // import aliases of the body do not depend on the signature.
+        let mut body = String::new();
+        match &value_def.value.value.body {
+            morphir_core::ir::v4::ValueBody::Expression(expression) => {
+                self.generate_value_expr(&mut body, expression)?;
+            }
+            morphir_core::ir::v4::ValueBody::Native { .. } => {
+                return Err(unsupported("Native definition body"));
+            }
+            morphir_core::ir::v4::ValueBody::External { .. } => {
+                return Err(unsupported("External definition body"));
+            }
+            morphir_core::ir::v4::ValueBody::Incomplete { .. } => {
+                return Err(unsupported("Incomplete definition body"));
+            }
+        }
+
         if let Some(doc) = &value_def.value.doc {
             for line in doc.lines() {
                 output.push_str(&format!("/// {line}\n"));
@@ -334,36 +353,29 @@ impl<V: Vfs> MorphirToGleamVisitor<V> {
         );
         output.push('(');
 
-        // Parameters
-        for (i, input) in value_def.value.value.input_types.iter().enumerate() {
+        // Annotate each parameter and the result with its IR type. Without the
+        // annotations the frontend cannot recover the signature, so a round
+        // trip would change the model (finos/morphir-gleam#34).
+        for (i, (input_name, input_type)) in value_def.value.value.input_types.iter().enumerate() {
             if i > 0 {
                 output.push_str(", ");
             }
             output.push_str(
-                &Name::from_canonical_string(input.0)
+                &Name::from_canonical_string(input_name)
                     .map_err(|error| std::io::Error::new(std::io::ErrorKind::InvalidInput, error))?
                     .to_snake_case(),
             );
+            output.push_str(": ");
+            self.generate_type_expr(output, input_type)?;
         }
 
-        output.push_str(") {\n  ");
-
-        // Body - V4 now stores body as actual Value
-        match &value_def.value.value.body {
-            morphir_core::ir::v4::ValueBody::Expression(body) => {
-                self.generate_value_expr(output, body)?;
-            }
-            morphir_core::ir::v4::ValueBody::Native { .. } => {
-                return Err(unsupported("Native definition body"));
-            }
-            morphir_core::ir::v4::ValueBody::External { .. } => {
-                return Err(unsupported("External definition body"));
-            }
-            morphir_core::ir::v4::ValueBody::Incomplete { .. } => {
-                return Err(unsupported("Incomplete definition body"));
-            }
+        output.push(')');
+        if let Some(output_type) = &value_def.value.value.output_type {
+            output.push_str(" -> ");
+            self.generate_type_expr(output, output_type)?;
         }
-
+        output.push_str(" {\n  ");
+        output.push_str(&body);
         output.push_str("\n}\n");
         Ok(())
     }
