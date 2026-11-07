@@ -136,30 +136,14 @@ It produces proposal/spec/tasks documents and a standalone `design.html` with in
 CSS and SVG. The committed schema and ownership lock work without a sibling checkout
 or an unpublished package dependency. Keep project policy in `openspec/config.yaml`.
 
-`mise install` installs the pinned OpenSpec 1.14.3, Node.js and MoonBit tooling.
-The shared checker uses MoonBit as a development tool; it does not affect Gleam packages.
-The MoonBit binary archive needs its matching core library on a fresh machine.
-Complete the pinned SDK once on Linux/macOS:
+`mise install` installs the pinned OpenSpec, Node.js and the pinned
+[`mission-control-tools`](https://github.com/moonrockz/mission-control/tree/tools-v0.1.0/apps/tools)
+release binary. The binary installs and checks the managed bundle. No other toolchain is necessary.
 
 ```sh
-curl -fsSL https://cli.moonbitlang.com/install/unix.sh | \
-  MOON_HOME="$(mise where http:moonbit)" bash -s -- "$(mise current http:moonbit)"
-mise exec -- moon update
-```
-
-On Windows, run the matching official installer in PowerShell:
-
-```powershell
-$env:MOON_HOME = mise where http:moonbit
-$env:MOONBIT_INSTALL_VERSION = mise current http:moonbit
-Invoke-RestMethod https://cli.moonbitlang.com/install/powershell.ps1 | Invoke-Expression
-mise exec -- moon update
-```
-
-```sh
-mise run openspec:check      # Detect missing or edited managed files
+mise run openspec:check      # Detect missing or edited managed files and bundle drift
 mise run openspec:validate   # Validate the schema and all proposal/spec artifacts
-mise run openspec:test       # Run shared workflow and setup-isolation tests
+mise run openspec:verify     # Run check and validate
 mise run openspec:setup      # Regenerate core agent skills using isolated preferences
 ```
 
@@ -168,9 +152,10 @@ for Codex/universal agents, Claude, Copilot, Cursor, Grok, Gemini and OpenCode.
 Existing `pr-monitor` skills remain available. Track proposals in GitHub issues and
 follow CONTRIBUTING.md for FINOS review and CLA requirements.
 
-To update the managed bundle, use the selected version of Mission Control's installer
-from its checkout, then commit the generated files and lock. The `openspec-ext` module
-is awaiting publication; do not add an unpublished registry dependency.
+To update the managed bundle, change the `mission-control-tools` version in
+`.config/mise/config.toml`, run `mise install` and `mise exec -- mission-control-tools openspec install`,
+then commit the generated files and lock. `mise run openspec:check` fails when the lock and the pinned
+version differ.
 
 ## Project Structure
 
