@@ -296,8 +296,16 @@ impl<V: Vfs> MorphirToGleamVisitor<V> {
                 ));
             }
             Type::Function(_, arg_type, return_type) => {
+                // `a -> b -> c` is the Gleam type `fn(a, b) -> c`, the same
+                // calling convention as generated functions, calls and lambdas.
                 output.push_str("fn(");
                 self.generate_type_expr(output, arg_type)?;
+                let mut return_type = return_type.as_ref();
+                while let Type::Function(_, arg_type, inner) = return_type {
+                    output.push_str(", ");
+                    self.generate_type_expr(output, arg_type)?;
+                    return_type = inner;
+                }
                 output.push_str(") -> ");
                 self.generate_type_expr(output, return_type)?;
             }
@@ -403,14 +411,37 @@ impl<V: Vfs> MorphirToGleamVisitor<V> {
                     output.push(']');
                     return Ok(());
                 }
-                self.generate_value_expr(output, function)?;
+                // The frontend curries a Gleam call `f(a, b)` to
+                // `Apply(Apply(f, a), b)`. Write the chain as one call, so it
+                // agrees with the generated functions, which take all their
+                // parameters at once.
+                let mut arguments = vec![argument.as_ref()];
+                let mut callee = function.as_ref();
+                while let Value::Apply(_, inner, inner_argument) = callee {
+                    arguments.push(inner_argument);
+                    callee = inner;
+                }
+                self.generate_value_expr(output, callee)?;
                 output.push('(');
-                self.generate_value_expr(output, argument)?;
+                for (i, argument) in arguments.iter().rev().enumerate() {
+                    if i > 0 {
+                        output.push_str(", ");
+                    }
+                    self.generate_value_expr(output, argument)?;
+                }
                 output.push(')');
             }
             Value::Lambda(_, param, body) => {
+                // Nested lambdas are one Gleam anonymous function with
+                // several parameters, the inverse of the frontend.
                 output.push_str("fn(");
                 self.generate_pattern(output, param)?;
+                let mut body = body.as_ref();
+                while let Value::Lambda(_, param, inner) = body {
+                    output.push_str(", ");
+                    self.generate_pattern(output, param)?;
+                    body = inner;
+                }
                 output.push_str(") { ");
                 self.generate_value_expr(output, body)?;
                 output.push_str(" }");

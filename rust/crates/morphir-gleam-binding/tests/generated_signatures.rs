@@ -152,6 +152,32 @@ fn v3_round_trip_keeps_argument_and_output_types() {
     assert_round_trip(&ir, "3.0.0");
 }
 
+/// Gleam functions take all their arguments at once; the IR curries them.
+/// Function types, calls and anonymous functions use the same convention as
+/// the generated definitions, so a signature that names a function type
+/// agrees with its body.
+const FUNCTION_VALUES: &str = "pub fn first(x: Int, y: Int) -> Int {\n  x\n}\n\n\
+     pub fn get() -> fn(Int, Int) -> Int {\n  first\n}\n\n\
+     pub fn call() -> Int {\n  first(1, 2)\n}\n\n\
+     pub fn make() -> fn(Int, Int) -> Int {\n  fn(a, b) { a }\n}\n\n\
+     pub fn apply(f: fn(Int, Int) -> Int) -> Int {\n  f(1, 2)\n}\n";
+
+#[test]
+fn v4_round_trip_keeps_function_types_with_several_arguments() {
+    let ir = compile(source(FUNCTION_VALUES), "4.0.0");
+    let text = assert_round_trip(&ir, "4.0.0");
+    for line in [
+        "pub fn get() -> fn(Int, Int) -> Int {",
+        "  first(1, 2)",
+        "pub fn make() -> fn(Int, Int) -> Int {",
+        "  fn(a, b) { a }",
+        "pub fn apply(f: fn(Int, Int) -> Int) -> Int {",
+        "  f(1, 2)",
+    ] {
+        assert!(text.contains(line), "{line}\n{text}");
+    }
+}
+
 #[test]
 #[ignore = "requires an installed Gleam compiler"]
 fn generated_signatures_pass_the_gleam_compiler() {
@@ -170,6 +196,7 @@ fn generated_signatures_pass_the_gleam_compiler() {
         ("kit", fixture("ir-v4.json")),
         ("kit_v3", fixture("ir-v3.json")),
         ("arguments", arguments),
+        ("function_values", compile(source(FUNCTION_VALUES), "4.0.0")),
     ] {
         let generated = generate(&ir);
         assert_eq!(generated.len(), 1);
