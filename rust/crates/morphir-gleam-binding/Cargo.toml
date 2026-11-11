@@ -51,7 +51,7 @@ pretty = "0.12"
 cap-std = { workspace = true }
 cap-fs-ext = { workspace = true }
 # Loads the built guest in tests/core_wasm.rs.
-wasmtime = { version = "43", optional = true }
+wasmtime = { version = "50", optional = true }
 
 [features]
 guest-host-tests = ["dep:wasmtime"]
