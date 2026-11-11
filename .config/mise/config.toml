@@ -5,7 +5,7 @@ bun = "latest"
 
 # OpenSpec uses the same portable html-design bundle as related Morphir repos.
 node = "26.13.1"
-"npm:@fission-ai/openspec" = "1.16.1"
+"npm:@fission-ai/openspec" = "1.17.0"
 
 # mission-control-tools installs and checks the shared html-design bundle.
 [tools."github:moonrockz/mission-control"]
