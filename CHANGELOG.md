@@ -21,6 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- OpenSpec moves from 1.16.1 to 2.2.0 and `mission-control-tools` from 0.1.1 to
+  0.1.3. The managed html-design bundle and its lock update to the 0.1.3
+  snapshot. The core agent skills, with the new `openspec` router skill, are
+  committed once in `.agents/skills/`. `.claude/skills/` and `.grok/skills/` hold
+  links to them, and the copies for Cursor, Gemini, Copilot and OpenCode are
+  removed. mise resolves tool releases through the GitHub API instead of its
+  version index.
 - The OpenSpec tasks use the pinned `mission-control-tools` 0.1.1 binary
   instead of the bundled `scripts/openspec-ext.mbtx` script. The extension lock
   is format 2. CI runs `mission-control-tools openspec check --bundle`.

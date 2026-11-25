@@ -136,9 +136,9 @@ It produces proposal/spec/tasks documents and a standalone `design.html` with in
 CSS and SVG. The committed schema and ownership lock work without a sibling checkout
 or an unpublished package dependency. Keep project policy in `openspec/config.yaml`.
 
-`mise install` installs the pinned OpenSpec, Node.js and the pinned
-[`mission-control-tools`](https://github.com/moonrockz/mission-control/tree/tools-v0.1.1/apps/tools)
-release binary. The binary installs and checks the managed bundle. No other toolchain is necessary.
+`mise install` installs the pinned OpenSpec 2.2.0, Node.js and the pinned
+[`mission-control-tools`](https://github.com/moonrockz/mission-control/tree/tools-v0.1.3/apps/tools)
+0.1.3 release binary. The binary installs and checks the managed bundle. No other toolchain is necessary.
 
 ```sh
 mise run openspec:check      # Detect missing or edited managed files and bundle drift
@@ -147,9 +147,12 @@ mise run openspec:verify     # Run check and validate
 mise run openspec:setup      # Regenerate core agent skills using isolated preferences
 ```
 
-Use the `openspec-propose` skill to start a change. The six core skills are committed
-for Codex/universal agents, Claude, Copilot, Cursor, Grok, Gemini and OpenCode.
-Existing `pr-monitor` skills remain available. Track proposals in GitHub issues and
+Use the `openspec-propose` skill to start a change. The `openspec` skill answers
+questions about OpenSpec and sends a request to the skill that does the work. The
+skills are committed once, in `.agents/skills/`, which Codex, Copilot, Cursor, Gemini
+and OpenCode read. `.claude/skills/` and `.grok/skills/` hold links to them. On
+Windows, run `git config --global core.symlinks true` before you clone, or each link
+checks out as a small text file. Existing `pr-monitor` skills remain available. Track proposals in GitHub issues and
 follow CONTRIBUTING.md for FINOS review and CLA requirements.
 
 To update the managed bundle, change the `mission-control-tools` version in

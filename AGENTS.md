@@ -230,8 +230,9 @@ This separation enables proper shell piping: `morphir-gleam generate | jq .`
 
 ## OpenSpec workflow
 
-Use the shared `html-design` schema for new change proposals. Start with the
-`openspec-propose` skill, then use `openspec-apply-change`, `openspec-update-change`,
+Use the shared `html-design` schema for new change proposals. The `openspec`
+skill answers questions about OpenSpec and routes a request to the correct skill.
+Start with the `openspec-propose` skill, then use `openspec-apply-change`, `openspec-update-change`,
 `openspec-sync-specs`, and `openspec-archive-change` as the change progresses.
 `openspec-explore` supports investigation before a proposal.
 
@@ -243,8 +244,10 @@ The schema and templates are managed snapshots that the pinned
 `mission-control-tools` binary (`github:moonrockz/mission-control`, releases
 `tools-v*`) installs and checks. Do not edit those files locally.
 Run `mise run openspec:verify` (check and validate) after OpenSpec changes.
-Run `mise run openspec:setup` to regenerate the six core skills without changing
-personal OpenSpec settings. See README.md for the pinned tooling setup.
+Run `mise run openspec:setup` to regenerate the core skills without changing
+personal OpenSpec settings. The skills are committed once in `.agents/skills/`;
+`.claude/skills/` and `.grok/skills/` hold links to them. Do not edit the links.
+See README.md for the pinned tooling setup.
 
 ## Git Workflow
 
