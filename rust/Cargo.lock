@@ -1295,6 +1295,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "ecow"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2dca6141d10838e13f9b166c190254a3f9b5d8379521f9b7510810061cef17a4"
+
+[[package]]
 name = "either"
 version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1353,7 +1359,7 @@ name = "erlang-generation"
 version = "1.0.0"
 source = "git+https://github.com/gleam-lang/gleam.git?rev=4a83802ca33a8a96227a1b332768725f232f9779#4a83802ca33a8a96227a1b332768725f232f9779"
 dependencies = [
- "ecow",
+ "ecow 0.2.6",
  "erlang-term-format",
  "itertools 0.15.0",
  "num-bigint 0.4.8",
@@ -1785,7 +1791,7 @@ dependencies = [
  "codespan-reporting",
  "debug-ignore",
  "dirs-next",
- "ecow",
+ "ecow 0.2.6",
  "erlang-generation",
  "flate2",
  "futures",
@@ -1915,7 +1921,7 @@ dependencies = [
  "base16",
  "bytes",
  "clap",
- "ecow",
+ "ecow 0.2.6",
  "flate2",
  "http",
  "http-auth-basic",
@@ -2654,7 +2660,7 @@ dependencies = [
  "cap-std",
  "chrono",
  "cucumber",
- "ecow",
+ "ecow 0.3.1",
  "getrandom 0.2.17",
  "gleam-core",
  "im",
@@ -3084,7 +3090,7 @@ name = "pretty-arena"
 version = "1.0.0"
 source = "git+https://github.com/gleam-lang/gleam.git?rev=4a83802ca33a8a96227a1b332768725f232f9779#4a83802ca33a8a96227a1b332768725f232f9779"
 dependencies = [
- "ecow",
+ "ecow 0.2.6",
  "im",
  "num-bigint 0.4.8",
  "typed-arena",
