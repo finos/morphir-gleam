@@ -2,4 +2,4 @@
 # jobs do not install Rust. rust/rust-toolchain.toml selects the same channel.
 [tools]
 rust = { version = "1.99.1", components = "rustfmt,clippy", targets = "wasm32-unknown-unknown" }
-wasm-tools = "1.262.0"
+wasm-tools = "1.263.0"
